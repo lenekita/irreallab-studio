@@ -468,16 +468,16 @@ async function stableHorde(prompt, seed, slotId) {
     prompt,
     negative_prompt: SD_NEG,
     params: {
-      sampler_name: 'k_dpmpp_2m_karras',  // Best quality sampler
+      sampler_name: 'k_dpmpp_2m',  // Valid sampler from API
       cfg_scale: 8.5,
       width: w,
       height: h,
-      steps: 35,  // Higher = better but slower
+      steps: 35,
       seed: String(seed),
       n: 1,
       karras: true,
     },
-    models: ['DreamShaper 8', 'Deliberate', 'AingDream'],  // Top quality models
+    models: ['DreamShaper 8', 'Deliberate', 'AingDream'],
     r2: true,
     nsfw: false,
   }
