@@ -494,42 +494,46 @@ async function stableHorde(prompt, seed, slotId) {
   else           { h = maxDim; w = Math.round(maxDim * ratio / 64) * 64 }
   w = Math.max(w, 512); h = Math.max(h, 512)
 
+  // Minimal, known-good request structure for Stable Horde
   const body = {
     prompt,
+    negative_prompt: SD_NEG,
     params: {
-      sampler_name: 'k_euler',
+      sampler_name: 'k_euler_a',
       cfg_scale: 7.5,
-      width: w, height: h,
+      width: w,
+      height: h,
       steps: 20,
       seed,
       n: 1,
-      karras: false,
-      negative_prompt: SD_NEG,
+      karras: true,
     },
-    models: ['Dreamshaper 8'],  // More available than Deliberate
+    models: [],  // Empty = use any available model
     r2: true,
-    shared: false,
     nsfw: false,
   }
 
   let jobId
   try {
+    console.log('Horde request:', JSON.stringify(body, null, 2))
     const res = await fetch('https://stablehorde.net/api/v2/generate/async', {
       method: 'POST',
       headers: { 'apikey': '0000000000', 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
 
+    const resText = await res.text()
+    console.log(`Horde response ${res.status}:`, resText)
+
     if(!res.ok) {
-      const txt = await res.text()
-      throw new Error(`Submit error ${res.status}: ${txt.substring(0, 100)}`)
+      throw new Error(`${res.status}: ${resText.substring(0, 200)}`)
     }
 
-    const data = await res.json()
+    const data = JSON.parse(resText)
     jobId = data?.id || data?.request_id
-    if(!jobId) throw new Error('No job ID in response')
+    if(!jobId) throw new Error(`No job ID in response: ${resText.substring(0, 100)}`)
   } catch(e) {
-    throw new Error(`Failed to queue: ${e.message}`)
+    throw new Error(`Queue failed: ${e.message}`)
   }
 
   setCardMsg(slotId, 'In GPU queue…')
