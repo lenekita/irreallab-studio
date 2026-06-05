@@ -496,7 +496,7 @@ function craftPrompts(idea){
 // ─── Image generation ─────────────────────────────────────────────────────────
 
 async function genPollinations(prompt){
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*99999)}`
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=1024&seed=${Math.floor(Math.random()*99999)}`
   const r = await fetch(url)
   if(!r.ok) throw new Error(`Pollinations error ${r.status}`)
   const blob = await r.blob()
