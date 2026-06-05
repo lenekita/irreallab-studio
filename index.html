@@ -533,7 +533,18 @@ async function genGemini(prompt, apiKey){
       }
     }catch(e){ lastErr=e.message }
   }
-  throw new Error("Gemini failed: " + lastErr)
+  // Parse friendly error from lastErr JSON string
+  try {
+    const parsed = JSON.parse(lastErr)
+    const msg = parsed?.error?.message || lastErr
+    if(msg.includes("API key not valid") || msg.includes("API_KEY_INVALID"))
+      throw new Error("Invalid Gemini key. Go to ⚙ Settings and paste a key starting with AIza…")
+    throw new Error("Gemini: " + msg)
+  } catch(e2) {
+    if(e2.message.startsWith("Gemini:") || e2.message.startsWith("Invalid"))
+      throw e2
+    throw new Error("Gemini failed — check your API key in ⚙ Settings")
+  }
 }
 
 function b64toBlob(b64, type){
@@ -610,9 +621,13 @@ function bgClose(e){
 function saveKey(){
   const k = document.getElementById('gkey').value.trim()
   if(!k){ toast('Paste your Gemini API key first','er'); return }
+  if(!k.startsWith('AIza')){
+    toast('⚠️ Gemini keys start with "AIza" — check you copied the right one','er')
+    return
+  }
   localStorage.setItem('GEMINI_KEY', k)
   document.getElementById('gkey').value = ''
-  toast('Gemini key saved!','ok')
+  toast('Gemini key saved! ✓','ok')
   closeSettings()
 }
 
