@@ -353,20 +353,20 @@ const FLUX_STYLES = {
   render3d:  'photorealistic 3D CGI render, Octane Render engine, volumetric god rays, subsurface scattering, perfect physically-based materials',
 }
 
-// Stable Diffusion (Deliberate/SD1.5): prefers weighted comma-separated tags
+// Stable Diffusion: weighted tags for maximum quality
 const SD_STYLES = {
-  cinematic: '(cinematic:1.3), (dramatic lighting:1.2), film grain, anamorphic, 35mm, color graded, chiaroscuro',
-  realistic: '(photorealistic:1.4), (hyperrealistic:1.2), RAW photo, 8k, DSLR, (sharp focus:1.2), professional',
-  portrait:  '(portrait:1.3), (studio lighting:1.2), 85mm, (bokeh:1.1), (sharp eyes:1.3), headshot, professional',
-  anime:     '(anime:1.4), (illustration:1.2), (Studio Ghibli:1.1), cel shading, vibrant, key visual, manga',
-  cyberpunk: '(cyberpunk:1.3), neon lights, (rain:1.1), dark alley, holographic, blade runner, (atmospheric:1.2)',
-  fantasy:   '(epic fantasy:1.3), magical particles, (dramatic sky:1.2), concept art, (detailed:1.3), wlop style',
-  abstract:  '(abstract art:1.3), geometric, vivid chromatic palette, (surreal:1.2), expressionist, digital painting',
-  vintage:   '(vintage:1.2), (film grain:1.3), Kodak, (analog:1.2), warm tones, light leaks, retro photography',
-  minimal:   '(minimalist:1.3), negative space, (monochromatic:1.1), clean lines, (elegant:1.2), architectural',
-  horror:    '(horror:1.3), (dark:1.2), eerie fog, deep shadows, (unsettling:1.2), atmospheric, gothic',
-  surreal:   '(surrealist:1.3), (dreamscape:1.2), impossible, Dalí, (hyper detailed:1.2), fantasy realism',
-  render3d:  '(3D render:1.3), (Octane:1.2), volumetric light, (photorealistic:1.2), subsurface scattering, CGI',
+  cinematic: '(cinematic:1.4), (award-winning:1.3), (dramatic lighting:1.3), (film grain:1.1), anamorphic lens, DCI color graded, (chiaroscuro:1.2), shallow depth of field',
+  realistic: '(photorealistic:1.5), (hyperrealistic:1.3), RAW photo, (professional photography:1.3), (8k uhd:1.2), (sharp focus:1.2), (intricate detail:1.2), DSLR',
+  portrait:  '(portrait:1.4), (studio portrait:1.3), (professional lighting:1.3), (rembrandt:1.2), (bokeh:1.2), (sharp eyes:1.4), (skin texture:1.2), headshot',
+  anime:     '(anime:1.4), (illustration:1.3), (Studio Ghibli:1.2), (cel shading:1.1), (vibrant colors:1.2), key visual, manga style, expressive',
+  cyberpunk: '(cyberpunk:1.4), (neon lights:1.3), (rain-soaked:1.2), (dark alley:1.1), holographic, blade runner, (atmospheric:1.3), noir, moody',
+  fantasy:   '(epic fantasy:1.4), (magical:1.3), (dramatic sky:1.2), concept art, (painted:1.2), (detailed:1.3), (cinematic:1.2), wlop inspired',
+  abstract:  '(abstract art:1.4), (geometric:1.2), (vivid colors:1.3), (surreal:1.2), expressionist, modern, (digital art:1.1), (complex:1.2)',
+  vintage:   '(vintage:1.3), (film grain:1.3), Kodak, (analog:1.2), (warm tones:1.2), light leaks, (retro:1.2), 1970s aesthetic, vignette',
+  minimal:   '(minimalist:1.4), (negative space:1.3), (clean lines:1.2), monochromatic, (elegant:1.3), (architectural:1.2), serene, simple',
+  horror:    '(horror:1.4), (dark:1.3), (eerie:1.2), fog, (deep shadows:1.3), (unsettling:1.2), gothic, terrifying, (atmospheric:1.2)',
+  surreal:   '(surrealist:1.4), (dreamscape:1.3), impossible geometry, Dalí, (hyper detailed:1.2), fantasy, dream logic, (magical:1.2)',
+  render3d:  '(3D render:1.4), (Octane render:1.2), volumetric light, (photorealistic:1.3), subsurface scattering, (CGI:1.1), professional, polished',
 }
 
 // Negative prompt for SD — crucial for quality
@@ -436,63 +436,21 @@ async function generate() {
 
 async function generateSlot(slotId, idea, seed) {
   setCardState(slotId, 'ld')
-  setCardMsg(slotId, 'Starting generators…')
+  setCardMsg(slotId, 'Queuing on Stable Diffusion network…')
 
-  const fluxPrompt = buildFluxPrompt(idea)
-  const sdPrompt   = buildSDPrompt(idea)
-
-  // Race FLUX (Pollinations) vs Stable Horde — each slot uses its own prompts
-  const fluxRace = pollinationsDirect(fluxPrompt, seed, slotId)
-  const hordeRace = stableHorde(sdPrompt, seed, slotId)
+  const sdPrompt = buildSDPrompt(idea)
 
   try {
-    const { src, generator } = await Promise.any([fluxRace, hordeRace])
-    setCardState(slotId, 'img', src, generator, fluxPrompt, sdPrompt)
+    const { src, generator } = await stableHorde(sdPrompt, seed, slotId)
+    setCardState(slotId, 'img', src, generator, '', sdPrompt)
     addHistory(src, idea)
   } catch(e) {
     setCardState(slotId, 'er', null, null, null, null,
-      'Both generators failed for this slot. Try again.')
+      `Generation failed: ${e.message}`)
     throw e
   }
 }
 
-// ── Pollinations via direct <img> tag — no CORS, FLUX-optimised prompt ──
-function pollinationsDirect(prompt, seed, slotId) {
-  return new Promise((resolve, reject) => {
-    setCardMsg(slotId, 'Trying Pollinations FLUX…')
-    const img = new Image()
-    const urls = [
-      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux-pro&seed=${seed}`,
-      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&seed=${seed}`,
-      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}`,
-      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`,
-    ]
-    let urlIdx = 0
-    const tid = setTimeout(() => { img.src = ''; reject(new Error('Pollinations timeout')) }, 45000)
-
-    const tryNext = () => {
-      if(urlIdx >= urls.length) {
-        clearTimeout(tid)
-        console.warn('All Pollinations URLs failed')
-        reject(new Error('Pollinations all variants failed'))
-        return
-      }
-      console.log(`Pollinations attempt ${urlIdx + 1}: ${urls[urlIdx]}`)
-      img.src = urls[urlIdx++]
-    }
-
-    img.onload  = () => {
-      clearTimeout(tid)
-      console.log('Pollinations succeeded:', img.currentSrc)
-      resolve({ src: img.currentSrc, generator: 'Pollinations FLUX' })
-    }
-    img.onerror = () => {
-      console.warn(`Pollinations URL ${urlIdx} failed`)
-      tryNext()
-    }
-    tryNext()
-  })
-}
 
 // ── Stable Horde — SD-optimised prompt with negative prompt ──
 async function stableHorde(prompt, seed, slotId) {
@@ -505,21 +463,21 @@ async function stableHorde(prompt, seed, slotId) {
   else           { h = maxDim; w = Math.round(maxDim * ratio / 64) * 64 }
   w = Math.max(w, 512); h = Math.max(h, 512)
 
-  // Stable Diffusion request — optimised for quality
+  // Stable Diffusion request — maximum quality settings
   const body = {
     prompt,
     negative_prompt: SD_NEG,
     params: {
-      sampler_name: 'k_dpmpp_sde_karras',
-      cfg_scale: 8,
+      sampler_name: 'k_dpmpp_2m_karras',  // Best quality sampler
+      cfg_scale: 8.5,
       width: w,
       height: h,
-      steps: 30,
+      steps: 35,  // Higher = better but slower
       seed: String(seed),
       n: 1,
       karras: true,
     },
-    models: ['Deliberate', 'DreamShaper 8', 'ICBINP - Illustration'],
+    models: ['DreamShaper 8', 'Deliberate', 'AingDream'],  // Top quality models
     r2: true,
     nsfw: false,
   }
