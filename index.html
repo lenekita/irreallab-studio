@@ -7,301 +7,219 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #060606;
-  --accent: #d4f03a;
-  --text: #ede9df;
-  --muted: #4a4a4a;
-  --s1: #0d0d0d;
-  --s2: #111;
-  --border: #1c1c1c;
+  --bg:#060606; --accent:#d4f03a; --text:#ede9df;
+  --muted:#4a4a4a; --s1:#0d0d0d; --s2:#111; --border:#1c1c1c;
+  --red:#f87171;
 }
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Space Mono', monospace;
-  min-height: 100vh;
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;min-height:100vh;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 15% 20%,rgba(212,240,58,.07) 0%,transparent 45%),
+             radial-gradient(circle at 85% 85%,rgba(212,240,58,.04) 0%,transparent 45%);
 }
-
-/* Ambient gradient */
-body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background:
-    radial-gradient(circle at 15% 20%, rgba(212,240,58,.07) 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(212,240,58,.04) 0%, transparent 45%);
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-/* Film grain */
-body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity:.04;
-}
-
-.wrap {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 56px 24px 80px;
-  position: relative; z-index: 10;
-}
+.wrap{max-width:1000px;margin:0 auto;padding:56px 24px 80px;position:relative;z-index:10;}
 
 /* ── HEADER ── */
-.eyebrow {
-  font-size: .55rem; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--muted); display: flex; align-items: center; gap: 12px;
-  margin-bottom: 14px;
-}
-.eyebrow::before { content:''; width:28px; height:1px; background:var(--muted); }
-.eyebrow span { color: var(--accent); }
+.eyebrow{font-size:.55rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.eyebrow::before{content:'';width:28px;height:1px;background:var(--muted);}
+.eyebrow span{color:var(--accent);}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,10vw,7.5rem);
+  line-height:.88;letter-spacing:-.01em;color:var(--text);
+  text-shadow:0 0 60px rgba(212,240,58,.08);margin-bottom:18px;}
+h1 em{color:var(--accent);font-style:normal;}
+.tagline{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:52px;display:flex;align-items:center;gap:14px;}
+.tagline::after{content:'';flex:1;max-width:200px;height:1px;background:var(--border);}
 
-h1 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3rem, 10vw, 7.5rem);
-  line-height: .88; letter-spacing: -.01em;
-  color: var(--text);
-  text-shadow: 0 0 60px rgba(212,240,58,.08);
-  margin-bottom: 18px;
+/* ── INPUTS ── */
+.field-label{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:10px;}
+.prompt-wrap{position:relative;margin-bottom:24px;}
+textarea{
+  width:100%;min-height:72px;max-height:200px;
+  padding:20px 180px 20px 20px;
+  background:var(--s1);border:1px solid var(--border);border-radius:3px;
+  color:var(--text);font-family:'Space Mono',monospace;font-size:13px;
+  line-height:1.65;resize:none;outline:none;overflow-y:auto;transition:border-color .2s;
 }
-h1 em { color: var(--accent); font-style:normal; }
+textarea::placeholder{color:var(--muted);}
+textarea:focus{border-color:rgba(212,240,58,.35);}
+.gen-btn{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  padding:13px 28px;background:var(--accent);border:none;border-radius:2px;
+  color:#060606;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.06em;
+  cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s;white-space:nowrap;
+}
+.gen-btn:hover:not(:disabled){background:#e8ff52;transform:translateY(-50%) scale(1.02);}
+.gen-btn:disabled{opacity:.35;cursor:not-allowed;transform:translateY(-50%);}
+.spin{width:13px;height:13px;border:2px solid rgba(6,6,6,.3);border-top-color:#060606;
+  border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.gen-btn.busy .spin{display:block;}
+.gen-btn.busy .lbl{display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-.tagline {
-  font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 60px;
-  display: flex; align-items: center; gap: 14px;
+/* ── PILLS ── */
+.row-label{font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:10px;}
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;}
+.pill{
+  padding:5px 13px;background:transparent;border:1px solid var(--border);border-radius:2px;
+  color:var(--muted);font-family:'Space Mono',monospace;font-size:9.5px;
+  letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.15s;
 }
-.tagline::after { content:''; flex:1; max-width:200px; height:1px; background:var(--border); }
+.pill:hover{border-color:rgba(212,240,58,.35);color:var(--text);}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#060606;font-weight:700;}
 
-/* ── PROMPT ── */
-.field-label {
-  font-size: .55rem; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--muted); display: block; margin-bottom: 10px;
+/* ── SETTINGS ROW (ratio + variations) ── */
+.settings-row{display:flex;align-items:flex-start;gap:32px;margin-bottom:44px;flex-wrap:wrap;}
+.setting-group{}
+.s-btns{display:flex;gap:7px;}
+.s-btn{
+  padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:2px;
+  color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.15s;
 }
-.prompt-wrap { position:relative; margin-bottom: 24px; }
+.s-btn:hover{border-color:rgba(212,240,58,.3);color:var(--text);}
+.s-btn.on{border-color:var(--accent);color:var(--accent);}
 
-textarea {
-  width:100%; min-height:72px; max-height:200px;
-  padding: 20px 180px 20px 20px;
-  background: var(--s1); border: 1px solid var(--border);
-  border-radius: 3px; color: var(--text);
-  font-family: 'Space Mono', monospace; font-size: 13px; line-height:1.65;
-  resize:none; outline:none; overflow-y:auto; transition: border-color .2s;
+/* ── OUTPUT HEADER ── */
+.out-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.out-meta{display:flex;align-items:center;gap:14px;}
+.out-count{font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.regen-btn{
+  padding:6px 14px;background:transparent;border:1px solid var(--border);border-radius:2px;
+  color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;
+  letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.15s;display:none;
 }
-textarea::placeholder { color: var(--muted); }
-textarea:focus { border-color: rgba(212,240,58,.35); }
+.regen-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-.gen-btn {
-  position:absolute; right:12px; top:50%; transform:translateY(-50%);
-  padding: 13px 28px;
-  background: var(--accent); border:none; border-radius:2px;
-  color: #060606; font-family: 'Bebas Neue', sans-serif;
-  font-size: 19px; letter-spacing:.06em;
-  cursor:pointer; display:flex; align-items:center; gap:8px;
-  transition:.15s; white-space:nowrap;
-}
-.gen-btn:hover:not(:disabled) { background:#e8ff52; transform:translateY(-50%) scale(1.02); }
-.gen-btn:active:not(:disabled) { transform:translateY(-50%) scale(.98); }
-.gen-btn:disabled { opacity:.35; cursor:not-allowed; transform:translateY(-50%); }
-.spin {
-  width:13px; height:13px;
-  border:2px solid rgba(6,6,6,.3); border-top-color:#060606;
-  border-radius:50%; animation:spin .6s linear infinite; display:none;
-}
-.gen-btn.busy .spin { display:block; }
-.gen-btn.busy .lbl { display:none; }
-@keyframes spin { to { transform:rotate(360deg); } }
+/* ── OUTPUT GRID ── */
+.out-grid{display:grid;gap:10px;margin-bottom:12px;}
+.out-grid.n1{grid-template-columns:1fr;}
+.out-grid.n2{grid-template-columns:1fr 1fr;}
+.out-grid.n4{grid-template-columns:1fr 1fr;}
 
-/* ── STYLE PILLS ── */
-.row-label {
-  font-size:.52rem; letter-spacing:.18em; text-transform:uppercase;
-  color:var(--muted); display:block; margin-bottom:10px;
-}
-.pills { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
-.pill {
-  padding:5px 13px; background:transparent;
-  border:1px solid var(--border); border-radius:2px;
-  color:var(--muted); font-family:'Space Mono',monospace;
-  font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
-  cursor:pointer; transition:.15s;
-}
-.pill:hover { border-color:rgba(212,240,58,.35); color:var(--text); }
-.pill.on { background:var(--accent); border-color:var(--accent); color:#060606; font-weight:700; }
-
-/* ── ASPECT RATIO ── */
-.ratios { display:flex; gap:7px; margin-bottom:44px; }
-.r-btn {
-  padding:5px 12px; background:transparent;
-  border:1px solid var(--border); border-radius:2px;
-  color:var(--muted); font-family:'Space Mono',monospace;
-  font-size:9px; letter-spacing:.14em; text-transform:uppercase;
-  cursor:pointer; transition:.15s;
-}
-.r-btn:hover { border-color:rgba(212,240,58,.3); color:var(--text); }
-.r-btn.on { border-color:var(--accent); color:var(--accent); }
-
-/* ── OUTPUT ── */
-.out-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:14px;
-}
-.out-actions { display:flex; gap:8px; }
-
-.icon-btn {
-  padding:6px 14px; background:transparent;
-  border:1px solid var(--border); border-radius:2px;
-  color:var(--muted); font-family:'Space Mono',monospace;
-  font-size:9px; letter-spacing:.1em; text-transform:uppercase;
-  cursor:pointer; text-decoration:none;
-  display:inline-flex; align-items:center; gap:5px;
-  transition:.15s;
-}
-.icon-btn:hover { border-color:var(--accent); color:var(--accent); }
-
-.canvas {
-  background:var(--s1); border:1px solid var(--border);
-  border-radius:3px; overflow:hidden;
+/* ── OUTPUT CARD ── */
+.out-card{
+  background:var(--s1);border:1px solid var(--border);border-radius:3px;
+  overflow:hidden;position:relative;
 }
 
-/* placeholder */
-.ph {
-  aspect-ratio:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  gap:16px; padding:48px; text-align:center;
+/* card states */
+.card-ph,.card-ld,.card-er{
+  aspect-ratio:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;padding:32px;text-align:center;
 }
-.ph-mark { font-size:52px; opacity:.06; }
-.ph-copy {
-  font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--muted); line-height:2;
-}
+.card-ld{display:none;}
+.card-er{display:none;}
 
-/* loading */
-.ld {
-  aspect-ratio:1; display:none; flex-direction:column;
-  align-items:center; justify-content:center; gap:28px;
+.card-ph-icon{font-size:36px;opacity:.07;}
+.card-ph-txt{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+
+/* mini spinner */
+.mini-ring{
+  width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite;
 }
-.prog-wrap { position:relative; width:72px; height:72px; }
-svg.prog { transform:rotate(-90deg); }
-circle.trk { stroke:var(--border); }
-circle.fill {
-  stroke:var(--accent);
-  stroke-dasharray: 163;
-  stroke-dashoffset: 163;
-  transition: stroke-dashoffset .5s ease;
-}
-.pct {
-  position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Bebas Neue',sans-serif; font-size:17px; color:var(--accent);
-}
-.ld-msg {
-  font-size:.58rem; letter-spacing:.13em; text-transform:uppercase;
-  color:var(--muted); text-align:center; max-width:280px; line-height:1.8;
-}
+.card-ld-msg{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);max-width:200px;line-height:1.8;text-align:center;}
 
 /* error */
-.er {
-  aspect-ratio:1; display:none; flex-direction:column;
-  align-items:center; justify-content:center;
-  gap:18px; padding:40px; text-align:center;
+.card-er-txt{font-size:.58rem;color:var(--red);line-height:1.7;max-width:240px;}
+.card-retry{
+  margin-top:4px;padding:6px 14px;background:transparent;
+  border:1px solid var(--red);border-radius:2px;color:var(--red);
+  font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.1em;
+  text-transform:uppercase;cursor:pointer;transition:.15s;
 }
-.er-txt {
-  font-size:.62rem; letter-spacing:.06em; color:#f87171;
-  line-height:1.8; max-width:340px;
-}
-.retry {
-  padding:8px 20px; background:transparent;
-  border:1px solid #f87171; border-radius:2px;
-  color:#f87171; font-family:'Space Mono',monospace;
-  font-size:.58rem; letter-spacing:.12em; text-transform:uppercase;
-  cursor:pointer; transition:.15s;
-}
-.retry:hover { background:rgba(248,113,113,.08); }
+.card-retry:hover{background:rgba(248,113,113,.08);}
 
 /* result image */
-.out-img { width:100%; display:none; }
+.card-img{width:100%;display:none;aspect-ratio:1;object-fit:cover;}
 
-/* prompt reveal */
-.pr { margin-top:12px; display:none; }
-.pr-toggle {
-  background:none; border:none; color:var(--muted);
-  font-family:'Space Mono',monospace; font-size:.58rem;
-  letter-spacing:.1em; text-transform:uppercase;
-  cursor:pointer; display:flex; align-items:center; gap:7px;
-  padding:0; transition:color .15s;
+/* card footer */
+.card-foot{
+  display:none;padding:9px 12px;border-top:1px solid var(--border);
+  align-items:center;justify-content:space-between;
 }
-.pr-toggle:hover { color:var(--text); }
-.pr-body {
-  display:none; margin-top:9px; padding:12px 15px;
-  background:var(--s1); border:1px solid var(--border); border-radius:3px;
-  font-size:.6rem; color:var(--muted); line-height:1.75; word-break:break-word;
+.card-foot.show{display:flex;}
+.card-gen-badge{
+  font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:5px;
 }
-.pr-body.on { display:block; }
+.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);}
+.card-actions-row{display:flex;gap:6px;}
+.card-dl,.card-prompt-btn{
+  padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:2px;
+  color:var(--muted);font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.1em;
+  text-transform:uppercase;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;transition:.15s;
+}
+.card-dl:hover,.card-prompt-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* prompt drawer */
+.card-prompt-drawer{
+  display:none;padding:10px 12px;border-top:1px solid var(--border);
+  font-size:.58rem;color:var(--muted);line-height:1.7;word-break:break-word;
+  background:var(--bg);
+}
+.card-prompt-drawer.open{display:block;}
 
 /* ── DIVIDER ── */
-.div { border:none; border-top:1px solid var(--border); margin:52px 0; }
+.div{border:none;border-top:1px solid var(--border);margin:52px 0;}
 
 /* ── HISTORY ── */
-.hist-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:18px;
+.hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.clr-btn{
+  background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;
+  font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .15s;
 }
-.clr-btn {
-  background:none; border:none; color:var(--muted);
-  font-family:'Space Mono',monospace; font-size:.55rem;
-  letter-spacing:.1em; text-transform:uppercase;
-  cursor:pointer; transition:color .15s;
+.clr-btn:hover{color:var(--red);}
+.hist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+.hi{
+  aspect-ratio:1;overflow:hidden;border-radius:3px;cursor:pointer;
+  border:1px solid var(--border);position:relative;
 }
-.clr-btn:hover { color:#f87171; }
-.hist-grid {
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;
+.hi img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.hi:hover img{transform:scale(1.06);}
+.hi-ov{
+  position:absolute;inset:0;background:rgba(6,6,6,.65);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .2s;
 }
-.hi {
-  aspect-ratio:1; overflow:hidden; border-radius:3px; cursor:pointer;
-  border:1px solid var(--border); position:relative;
-}
-.hi img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s; }
-.hi:hover img { transform:scale(1.06); }
-.hi-ov {
-  position:absolute; inset:0; background:rgba(6,6,6,.6);
-  display:flex; align-items:center; justify-content:center;
-  opacity:0; transition:opacity .2s;
-}
-.hi:hover .hi-ov { opacity:1; }
-.hi-ov span {
-  font-size:.52rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent);
-}
+.hi:hover .hi-ov{opacity:1;}
+.hi-ov span{font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);}
 
 /* ── FOOTER ── */
-footer {
-  margin-top:72px; padding-top:24px; border-top:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-}
-.ft-brand {
-  font-family:'Bebas Neue',sans-serif; font-size:20px;
-  color:var(--muted); letter-spacing:.04em;
-}
-.ft-note {
-  font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
-}
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;}
+.ft-brand{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted);}
+.ft-note{font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
 
 /* ── TOAST ── */
-.toast {
-  position:fixed; bottom:24px; right:24px;
-  background:var(--s2); border:1px solid var(--border);
-  border-radius:2px; padding:12px 18px;
-  font-family:'Space Mono',monospace; font-size:.62rem; letter-spacing:.05em;
-  z-index:200; transform:translateY(60px); opacity:0; transition:.25s; pointer-events:none;
+.toast{
+  position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--border);
+  border-radius:2px;padding:12px 18px;font-family:'Space Mono',monospace;font-size:.62rem;
+  letter-spacing:.05em;z-index:200;transform:translateY(60px);opacity:0;
+  transition:.25s;pointer-events:none;
 }
-.toast.on { transform:none; opacity:1; }
-.toast.ok { border-color:var(--accent); color:var(--accent); }
-.toast.er { border-color:#f87171; color:#f87171; }
+.toast.on{transform:none;opacity:1;}
+.toast.ok{border-color:var(--accent);color:var(--accent);}
+.toast.er{border-color:var(--red);color:var(--red);}
 
-/* ── RESPONSIVE ── */
-@media(max-width:600px) {
-  h1 { font-size:3.2rem; }
-  .gen-btn { padding:10px 16px; font-size:16px; right:8px; }
-  textarea { padding-right:110px; }
-  .hist-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+@media(max-width:600px){
+  h1{font-size:3rem;}
+  .gen-btn{padding:10px 16px;font-size:16px;right:8px;}
+  textarea{padding-right:110px;}
+  .out-grid.n2,.out-grid.n4{grid-template-columns:1fr;}
+  .settings-row{gap:18px;}
 }
 </style>
 </head>
@@ -311,7 +229,7 @@ footer {
   <!-- Header -->
   <div class="eyebrow"><span>personal workspace</span> · AI image generation</div>
   <h1>IRREALLAB<br><em>STUDIO</em></h1>
-  <p class="tagline">Powered by Pollinations &amp; Stable Horde · 100% free · No account needed</p>
+  <p class="tagline">Dual-engine · FLUX + Stable Diffusion · 100% free</p>
 
   <!-- Prompt -->
   <label class="field-label" for="idea">Describe your image</label>
@@ -325,73 +243,67 @@ footer {
     </button>
   </div>
 
-  <!-- Style presets -->
+  <!-- Style pills -->
   <span class="row-label">Style</span>
   <div class="pills">
-    <button class="pill on" data-s="cinematic"  onclick="setStyle(this)">Cinematic</button>
-    <button class="pill"    data-s="realistic"  onclick="setStyle(this)">Realistic</button>
-    <button class="pill"    data-s="portrait"   onclick="setStyle(this)">Portrait</button>
-    <button class="pill"    data-s="anime"      onclick="setStyle(this)">Anime</button>
-    <button class="pill"    data-s="cyberpunk"  onclick="setStyle(this)">Cyberpunk</button>
-    <button class="pill"    data-s="fantasy"    onclick="setStyle(this)">Fantasy</button>
-    <button class="pill"    data-s="abstract"   onclick="setStyle(this)">Abstract</button>
-    <button class="pill"    data-s="vintage"    onclick="setStyle(this)">Vintage</button>
-    <button class="pill"    data-s="minimal"    onclick="setStyle(this)">Minimal</button>
-    <button class="pill"    data-s="horror"     onclick="setStyle(this)">Dark / Horror</button>
-    <button class="pill"    data-s="surreal"    onclick="setStyle(this)">Surreal</button>
-    <button class="pill"    data-s="3d"         onclick="setStyle(this)">3D Render</button>
+    <button class="pill on"  data-s="cinematic"  onclick="setStyle(this)">Cinematic</button>
+    <button class="pill"     data-s="realistic"  onclick="setStyle(this)">Realistic</button>
+    <button class="pill"     data-s="portrait"   onclick="setStyle(this)">Portrait</button>
+    <button class="pill"     data-s="anime"      onclick="setStyle(this)">Anime</button>
+    <button class="pill"     data-s="cyberpunk"  onclick="setStyle(this)">Cyberpunk</button>
+    <button class="pill"     data-s="fantasy"    onclick="setStyle(this)">Fantasy</button>
+    <button class="pill"     data-s="abstract"   onclick="setStyle(this)">Abstract</button>
+    <button class="pill"     data-s="vintage"    onclick="setStyle(this)">Vintage</button>
+    <button class="pill"     data-s="minimal"    onclick="setStyle(this)">Minimal</button>
+    <button class="pill"     data-s="horror"     onclick="setStyle(this)">Dark / Horror</button>
+    <button class="pill"     data-s="surreal"    onclick="setStyle(this)">Surreal</button>
+    <button class="pill"     data-s="render3d"   onclick="setStyle(this)">3D Render</button>
   </div>
 
-  <!-- Aspect ratio -->
-  <span class="row-label">Format</span>
-  <div class="ratios">
-    <button class="r-btn on" data-w="1024" data-h="1024" onclick="setRatio(this)">1:1 Square</button>
-    <button class="r-btn"    data-w="1024" data-h="576"  onclick="setRatio(this)">16:9 Wide</button>
-    <button class="r-btn"    data-w="576"  data-h="1024" onclick="setRatio(this)">9:16 Tall</button>
-    <button class="r-btn"    data-w="1024" data-h="768"  onclick="setRatio(this)">4:3</button>
+  <!-- Format + Variations -->
+  <div class="settings-row">
+    <div class="setting-group">
+      <span class="row-label">Format</span>
+      <div class="s-btns" id="ratioRow">
+        <button class="s-btn on" data-w="1024" data-h="1024" onclick="setRatio(this)">1:1 Square</button>
+        <button class="s-btn"    data-w="1024" data-h="576"  onclick="setRatio(this)">16:9 Wide</button>
+        <button class="s-btn"    data-w="576"  data-h="1024" onclick="setRatio(this)">9:16 Tall</button>
+        <button class="s-btn"    data-w="1024" data-h="768"  onclick="setRatio(this)">4:3</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <span class="row-label">Variations</span>
+      <div class="s-btns" id="varRow">
+        <button class="s-btn"    data-v="1" onclick="setVar(this)">× 1</button>
+        <button class="s-btn on" data-v="2" onclick="setVar(this)">× 2</button>
+        <button class="s-btn"    data-v="4" onclick="setVar(this)">× 4</button>
+      </div>
+    </div>
   </div>
 
   <!-- Output -->
   <div class="out-header">
-    <span class="field-label" style="margin:0">Output</span>
-    <div class="out-actions">
-      <a  class="icon-btn" id="dlBtn"    style="display:none" download="irreallab.png">↓ Save</a>
-      <button class="icon-btn" id="regenBtn" style="display:none" onclick="generate()">↺ New variation</button>
+    <div class="out-meta">
+      <span class="field-label" style="margin:0">Output</span>
+      <span class="out-count" id="outCount"></span>
     </div>
+    <button class="regen-btn" id="regenBtn" onclick="generate()">↺ New variations</button>
   </div>
 
-  <div class="canvas">
-    <!-- Placeholder -->
-    <div class="ph" id="phState">
-      <div class="ph-mark">✦</div>
-      <div class="ph-copy">Your image will<br>appear here</div>
-    </div>
-    <!-- Loading -->
-    <div class="ld" id="ldState">
-      <div class="prog-wrap">
-        <svg class="prog" width="72" height="72">
-          <circle class="trk"  cx="36" cy="36" r="26" stroke-width="3" fill="none"/>
-          <circle class="fill" id="fillCircle" cx="36" cy="36" r="26" stroke-width="3" fill="none"/>
-        </svg>
-        <div class="pct" id="pctTxt">0%</div>
+  <div class="out-grid n2" id="outGrid">
+    <!-- cards injected by JS -->
+    <div class="out-card">
+      <div class="card-ph">
+        <div class="card-ph-icon">✦</div>
+        <div class="card-ph-txt">Your images<br>will appear here</div>
       </div>
-      <div class="ld-msg" id="ldMsg">Initialising…</div>
     </div>
-    <!-- Error -->
-    <div class="er" id="erState">
-      <div class="er-txt" id="erTxt"></div>
-      <button class="retry" onclick="generate()">↺ Try again</button>
+    <div class="out-card">
+      <div class="card-ph">
+        <div class="card-ph-icon">✦</div>
+        <div class="card-ph-txt">Your images<br>will appear here</div>
+      </div>
     </div>
-    <!-- Image -->
-    <img class="out-img" id="outImg" alt="Generated image">
-  </div>
-
-  <!-- Prompt reveal -->
-  <div class="pr" id="prWrap">
-    <button class="pr-toggle" onclick="togglePR()">
-      <span id="prArr">▶</span> View crafted prompt
-    </button>
-    <div class="pr-body" id="prBody"></div>
   </div>
 
   <hr class="div">
@@ -411,132 +323,175 @@ footer {
     <div class="ft-brand">IRREALLAB</div>
     <div class="ft-note">Personal workspace · Local only</div>
   </footer>
-
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── Config ───────────────────────────────────────────────────────────────────
+// ─── State ────────────────────────────────────────────────────────────────────
 let activeStyle = 'cinematic'
 let imgW = 1024, imgH = 1024
-let lastPrompt = ''
+let varCount = 2
 let history = []
+let lastIdea = ''
 
-const STYLES = {
-  cinematic: 'cinematic photography, anamorphic lens flare, dramatic lighting, film grain, color graded, 4K DCI',
-  realistic: 'photorealistic, hyperrealistic, shot on Sony A7R V, professional photography, 8K, sharp detail',
-  portrait:  'studio portrait photography, Rembrandt lighting, 85mm f/1.4 bokeh, ultra-sharp eyes, professional',
-  anime:     'anime key visual, Studio Ghibli color palette, detailed illustration, vibrant, cinematic composition',
-  cyberpunk: 'cyberpunk noir, neon-lit rain-soaked streets, holographic billboards, Blade Runner atmosphere',
-  fantasy:   'epic fantasy concept art, magical golden particles, dramatic sky, cinematic, highly detailed',
-  abstract:  'abstract expressionism, generative art, vivid chromatic palette, geometric tension, surreal',
-  vintage:   'vintage film photograph, expired Kodak Ektar, warm analog grain, faded tones, 1970s',
-  minimal:   'minimalist composition, negative space, monochromatic palette, clean lines, Bauhaus-inspired',
-  horror:    'dark atmospheric horror, deep shadows, eerie fog, unsettling silence, cinematic dread',
-  surreal:   'surrealist dreamscape, impossible architecture, Dalí-inspired, hyper-detailed, mind-bending',
-  '3d':      '3D CGI render, Octane Render, volumetric light, subsurface scattering, ultra-realistic material',
+// ─── Prompt maps — FLUX vs Stable Diffusion use completely different syntax ──
+
+// FLUX (Pollinations): loves descriptive natural language sentences
+const FLUX_STYLES = {
+  cinematic: 'cinematic wide-angle photography with dramatic chiaroscuro lighting, shallow depth of field, anamorphic lens flare, color-graded film aesthetic',
+  realistic: 'ultra-photorealistic professional photography, natural light, shot on Sony A7R V, tack-sharp with rich detail',
+  portrait:  'intimate studio portrait photography, Rembrandt loop lighting, 85mm f/1.4 bokeh, eyes perfectly in focus',
+  anime:     'anime key visual illustration in Studio Ghibli style, hand-painted quality, expressive line art, vibrant palette',
+  cyberpunk: 'cyberpunk noir cityscape, neon lights reflecting on rain-slicked streets, holographic signs, Blade Runner 2049 atmosphere',
+  fantasy:   'epic high-fantasy concept art, magical golden light particles, towering architecture, painterly cinematic composition',
+  abstract:  'abstract expressionist digital art, bold chromatic contrasts, dynamic geometric tension, surreal non-representational forms',
+  vintage:   'vintage analog photograph, expired Kodak film with halation and grain, warm faded tones, light leaks, 1970s aesthetic',
+  minimal:   'minimalist architectural photography, radical negative space, monochromatic palette, precise clean geometry',
+  horror:    'dark atmospheric horror, dense volumetric fog, deep underexposed shadows, unsettling eerie silence, cinematic dread',
+  surreal:   'hyper-detailed surrealist dreamscape, impossible gravity-defying architecture, Dalí-esque imagination, dream logic',
+  render3d:  'photorealistic 3D CGI render, Octane Render engine, volumetric god rays, subsurface scattering, perfect physically-based materials',
 }
 
-const NIGHT_W = new Set(['night','dark','moon','stars','lunar','midnight','space','galaxy','twilight','shadow'])
-const WARM_W  = new Set(['sunset','sunrise','dawn','dusk','golden','warm','fire','sun'])
+// Stable Diffusion (Deliberate/SD1.5): prefers weighted comma-separated tags
+const SD_STYLES = {
+  cinematic: '(cinematic:1.3), (dramatic lighting:1.2), film grain, anamorphic, 35mm, color graded, chiaroscuro',
+  realistic: '(photorealistic:1.4), (hyperrealistic:1.2), RAW photo, 8k, DSLR, (sharp focus:1.2), professional',
+  portrait:  '(portrait:1.3), (studio lighting:1.2), 85mm, (bokeh:1.1), (sharp eyes:1.3), headshot, professional',
+  anime:     '(anime:1.4), (illustration:1.2), (Studio Ghibli:1.1), cel shading, vibrant, key visual, manga',
+  cyberpunk: '(cyberpunk:1.3), neon lights, (rain:1.1), dark alley, holographic, blade runner, (atmospheric:1.2)',
+  fantasy:   '(epic fantasy:1.3), magical particles, (dramatic sky:1.2), concept art, (detailed:1.3), wlop style',
+  abstract:  '(abstract art:1.3), geometric, vivid chromatic palette, (surreal:1.2), expressionist, digital painting',
+  vintage:   '(vintage:1.2), (film grain:1.3), Kodak, (analog:1.2), warm tones, light leaks, retro photography',
+  minimal:   '(minimalist:1.3), negative space, (monochromatic:1.1), clean lines, (elegant:1.2), architectural',
+  horror:    '(horror:1.3), (dark:1.2), eerie fog, deep shadows, (unsettling:1.2), atmospheric, gothic',
+  surreal:   '(surrealist:1.3), (dreamscape:1.2), impossible, Dalí, (hyper detailed:1.2), fantasy realism',
+  render3d:  '(3D render:1.3), (Octane:1.2), volumetric light, (photorealistic:1.2), subsurface scattering, CGI',
+}
 
-function buildPrompt(idea) {
-  const low = idea.toLowerCase().split(/\W+/)
-  let light = 'soft diffused natural light, perfect exposure, professional colour grade'
-  if(low.some(x => NIGHT_W.has(x))) light = 'moonlight, deep indigo atmosphere, ethereal glow, long shadows'
-  else if(low.some(x => WARM_W.has(x))) light = 'golden hour warm backlight, god rays, long cinematic shadows'
-  const s = STYLES[activeStyle] || STYLES.cinematic
-  return `${idea}, ${s}, ${light}, masterpiece, award-winning, highly detailed`
+// Negative prompt for SD — crucial for quality
+const SD_NEG = 'ugly, blurry, low quality, bad anatomy, worst quality, lowres, jpeg artifacts, watermark, text, signature, duplicate, deformed, disfigured, extra limbs, bad hands, cropped, out of frame'
+
+const NIGHT_W = new Set(['night','dark','moon','stars','lunar','midnight','space','galaxy','twilight','shadow'])
+const WARM_W  = new Set(['sunset','sunrise','dawn','dusk','golden','warm','fire'])
+
+function getLighting(idea) {
+  const w = idea.toLowerCase().split(/\W+/)
+  if(w.some(x => NIGHT_W.has(x))) return 'moonlit night, deep indigo shadows, ethereal glow'
+  if(w.some(x => WARM_W.has(x)))  return 'golden hour backlight, warm sun rays, cinematic shadows'
+  return 'soft natural diffused light, professional colour grade'
+}
+
+function getLightingSD(idea) {
+  const w = idea.toLowerCase().split(/\W+/)
+  if(w.some(x => NIGHT_W.has(x))) return '(moonlight:1.2), night, dark blue atmosphere, (ethereal:1.1)'
+  if(w.some(x => WARM_W.has(x)))  return '(golden hour:1.2), warm light, (sun rays:1.1), cinematic'
+  return '(soft lighting:1.1), professional, (well lit:1.1)'
+}
+
+// Build prompt optimised for FLUX (natural language)
+function buildFluxPrompt(idea) {
+  const style   = FLUX_STYLES[activeStyle] || FLUX_STYLES.cinematic
+  const light   = getLighting(idea)
+  return `${idea}. ${style}. ${light}. Masterpiece quality, highly detailed, award-winning.`
+}
+
+// Build prompt optimised for Stable Diffusion (weighted tags)
+function buildSDPrompt(idea) {
+  const style = SD_STYLES[activeStyle] || SD_STYLES.cinematic
+  const light = getLightingSD(idea)
+  const quality = 'masterpiece, best quality, (ultra detailed:1.2), sharp focus, 8k uhd'
+  return `${idea}, ${style}, ${light}, ${quality}`
 }
 
 // ─── Generation ───────────────────────────────────────────────────────────────
 async function generate() {
   const idea = document.getElementById('idea').value.trim()
-  if(!idea) { toast('Enter your image idea first', 'er'); return }
+  if(!idea) { showToast('Enter your image idea first', 'er'); return }
 
+  lastIdea = idea
   const btn = document.getElementById('genBtn')
   btn.disabled = true; btn.classList.add('busy')
 
-  setState('ld')
-  hide('dlBtn'); hide('regenBtn'); hide('prWrap')
-  setProgress(0, 'Building your prompt…')
+  renderGrid(varCount)
+  document.getElementById('outCount').textContent = ''
+  document.getElementById('regenBtn').style.display = 'none'
 
-  const prompt = buildPrompt(idea)
-  lastPrompt = prompt
+  let done = 0
 
-  try {
-    const src = await raceAll(prompt)
-    const img = document.getElementById('outImg')
-    img.src = src
-    img.style.display = 'block'
-    setState('img')
-    setProgress(100, 'Done!')
+  // Launch all variations in parallel
+  const jobs = Array.from({ length: varCount }, (_, i) => {
+    const seed = Math.floor(Math.random() * 999999)
+    return generateSlot(i, idea, seed).then(() => {
+      done++
+      document.getElementById('outCount').textContent = `${done} / ${varCount} ready`
+    }).catch(() => { done++ })
+  })
 
-    document.getElementById('dlBtn').href = src
-    document.getElementById('dlBtn').download = `irreallab-${Date.now()}.png`
-    show('dlBtn', 'inline-flex')
-    show('regenBtn', 'inline-flex')
-    show('prWrap', 'block')
-    document.getElementById('prBody').textContent = prompt
-    addHistory(src, idea)
-  } catch(e) {
-    setState('er')
-    document.getElementById('erTxt').textContent = e.message
-  }
+  await Promise.allSettled(jobs)
 
+  document.getElementById('regenBtn').style.display = 'inline-flex'
   btn.disabled = false; btn.classList.remove('busy')
 }
 
-// ── Race all generators — first to succeed wins ────────────────────────────
-async function raceAll(prompt) {
-  setProgress(10, 'Launching generators in parallel…')
+async function generateSlot(slotId, idea, seed) {
+  setCardState(slotId, 'ld')
+  setCardMsg(slotId, 'Starting generators…')
 
-  // Pollinations: load via <img> tag — no CORS, no fetch, bypasses 402 restrictions
-  const pollP = pollinationsDirect(prompt)
+  const fluxPrompt = buildFluxPrompt(idea)
+  const sdPrompt   = buildSDPrompt(idea)
 
-  // Stable Horde: submit immediately in parallel
-  const hordeP = stableHorde(prompt)
+  // Race FLUX (Pollinations) vs Stable Horde — each slot uses its own prompts
+  const fluxRace = pollinationsDirect(fluxPrompt, seed, slotId)
+  const hordeRace = stableHorde(sdPrompt, seed, slotId)
 
-  // Whichever finishes first wins
   try {
-    return await Promise.any([pollP, hordeP])
-  } catch {
-    throw new Error('All generators failed. Please try again in a moment.')
+    const { src, generator } = await Promise.any([fluxRace, hordeRace])
+    setCardState(slotId, 'img', src, generator, fluxPrompt, sdPrompt)
+    addHistory(src, idea)
+  } catch(e) {
+    setCardState(slotId, 'er', null, null, null, null,
+      'Both generators failed for this slot. Try again.')
+    throw e
   }
 }
 
-// Pollinations via direct <img> src — no CORS/fetch overhead
-function pollinationsDirect(prompt) {
+// ── Pollinations via direct <img> tag — no CORS, FLUX-optimised prompt ──
+function pollinationsDirect(prompt, seed, slotId) {
   return new Promise((resolve, reject) => {
-    const seed = Math.floor(Math.random() * 999999)
-    const url  = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${imgW}&height=${imgH}&seed=${seed}`
-    const img  = new Image()
-    const tid  = setTimeout(() => reject(new Error('Pollinations timeout')), 40000)
-    img.onload  = () => { clearTimeout(tid); setProgress(95, 'Pollinations done!'); resolve(url) }
-    img.onerror = () => { clearTimeout(tid); reject(new Error('Pollinations 402')) }
+    setCardMsg(slotId, 'Trying Pollinations FLUX…')
+    const img = new Image()
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${imgW}&height=${imgH}&seed=${seed}`
+    const tid = setTimeout(() => { img.src = ''; reject(new Error('timeout')) }, 35000)
+    img.onload  = () => { clearTimeout(tid); resolve({ src: url, generator: 'Pollinations FLUX' }) }
+    img.onerror = () => { clearTimeout(tid); reject(new Error('Pollinations unavailable')) }
     img.src = url
   })
 }
 
-// Stable Horde — free anonymous SDXL, optimised for speed
-async function stableHorde(prompt) {
-  setProgress(15, 'Queuing on Stable Horde GPU network…')
+// ── Stable Horde — SD-optimised prompt with negative prompt ──
+async function stableHorde(prompt, seed, slotId) {
+  setCardMsg(slotId, 'Queuing on Stable Horde…')
 
-  const dim = Math.min(imgW, imgH, 768)  // cap at 768 for speed
+  const maxDim = 768
+  const ratio  = imgW / imgH
+  let w, h
+  if(ratio >= 1) { w = maxDim; h = Math.round(maxDim / ratio / 64) * 64 }
+  else           { h = maxDim; w = Math.round(maxDim * ratio / 64) * 64 }
+  w = Math.max(w, 512); h = Math.max(h, 512)
 
   const body = {
-    prompt,
+    prompt: `${prompt} ### ${SD_NEG}`,   // ### separates positive / negative in horde
     params: {
-      sampler_name: 'k_euler',   // faster than euler_a
+      sampler_name: 'k_euler',
       cfg_scale: 7,
-      width:  imgW >= imgH ? dim : Math.round(dim * imgW / imgH / 64) * 64,
-      height: imgH >= imgW ? dim : Math.round(dim * imgH / imgW / 64) * 64,
-      steps: 20,                 // 20 steps = fast + good quality
+      width: w, height: h,
+      steps: 20,
+      seed,
       n: 1,
       karras: false,
     },
-    models: ['Deliberate'],      // fast, high-quality, many workers
+    models: ['Deliberate'],
     r2: true,
     shared: false,
     nsfw: false,
@@ -548,74 +503,148 @@ async function stableHorde(prompt) {
     body: JSON.stringify(body),
   })
 
-  if(!res.ok) throw new Error(`Horde queue error ${res.status}`)
+  if(!res.ok) throw new Error(`Horde error ${res.status}`)
   const { id } = await res.json()
-  if(!id) throw new Error('No job ID — try again.')
+  if(!id) throw new Error('No job ID')
 
-  // Poll every 2s (faster polling)
+  // Poll every 2s
   for(let i = 0; i < 150; i++) {
     await sleep(2000)
     try {
       const chk = await fetch(`https://stablehorde.net/api/v2/generate/check/${id}`)
       if(!chk.ok) continue
       const st = await chk.json()
-      const pct = Math.min(88, 20 + i * 0.5)
-      const msg = st.done
-        ? 'Finalising your image…'
-        : st.wait_time > 0
-          ? `Queue: ~${st.wait_time}s remaining…`
-          : 'GPU rendering…'
-      setProgress(Math.round(pct), msg)
+      const msg = st.done ? 'Finalising…'
+        : st.wait_time > 0 ? `GPU queue: ~${st.wait_time}s…`
+        : 'GPU rendering…'
+      setCardMsg(slotId, msg)
       if(st.done) break
-      if(st.faulted) throw new Error('Worker faulted — retrying…')
+      if(st.faulted) throw new Error('Worker faulted')
     } catch(_) { /* keep polling */ }
   }
 
   const final = await fetch(`https://stablehorde.net/api/v2/generate/status/${id}`)
   const data  = await final.json()
-  if(!data.generations?.length) throw new Error('No image returned — try again.')
+  if(!data.generations?.length) throw new Error('No image returned')
 
-  setProgress(93, 'Downloading…')
+  setCardMsg(slotId, 'Downloading…')
   const blob = await (await fetch(data.generations[0].img)).blob()
-  return URL.createObjectURL(blob)
+  return { src: URL.createObjectURL(blob), generator: 'Stable Diffusion' }
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 
-// ─── Progress ring ────────────────────────────────────────────────────────────
-const C = 2 * Math.PI * 26  // circumference
-document.getElementById('fillCircle').style.strokeDasharray  = C
-document.getElementById('fillCircle').style.strokeDashoffset = C
-
-function setProgress(pct, msg) {
-  const offset = C - (pct / 100) * C
-  document.getElementById('fillCircle').style.strokeDashoffset = offset
-  document.getElementById('pctTxt').textContent = pct + '%'
-  if(msg) document.getElementById('ldMsg').textContent = msg
+// ─── Card rendering ───────────────────────────────────────────────────────────
+function renderGrid(n) {
+  const grid = document.getElementById('outGrid')
+  grid.className = `out-grid n${n === 1 ? 1 : 2}`
+  grid.innerHTML = Array.from({ length: n }, (_, i) => `
+    <div class="out-card" id="card-${i}">
+      <div class="card-ld" id="card-ld-${i}">
+        <div class="mini-ring"></div>
+        <div class="card-ld-msg" id="card-msg-${i}">Initialising…</div>
+      </div>
+      <div class="card-ph" id="card-ph-${i}" style="display:none">
+        <div class="card-ph-icon">✦</div>
+      </div>
+      <div class="card-er" id="card-er-${i}">
+        <div class="card-er-txt" id="card-er-txt-${i}"></div>
+        <button class="card-retry" onclick="generate()">↺ Retry all</button>
+      </div>
+      <img class="card-img" id="card-img-${i}" alt="Generated image">
+      <div class="card-foot" id="card-foot-${i}">
+        <div class="card-gen-badge" id="card-badge-${i}">
+          <span class="badge-dot"></span><span></span>
+        </div>
+        <div class="card-actions-row">
+          <button class="card-prompt-btn" onclick="toggleCardPrompt(${i})">Prompt</button>
+          <a class="card-dl" id="card-dl-${i}" download="irreallab-${Date.now()}-${i}.png">↓ Save</a>
+        </div>
+      </div>
+      <div class="card-prompt-drawer" id="card-drawer-${i}"></div>
+    </div>
+  `).join('')
 }
 
-// ─── UI state ─────────────────────────────────────────────────────────────────
-function setState(s) {
-  const ids = ['phState','ldState','erState']
-  ids.forEach(id => document.getElementById(id).style.display = 'none')
-  document.getElementById('outImg').style.display = 'none'
-  if(s === 'ph') document.getElementById('phState').style.display = 'flex'
-  if(s === 'ld') document.getElementById('ldState').style.display = 'flex'
-  if(s === 'er') document.getElementById('erState').style.display = 'flex'
-  if(s === 'img') { /* img shown separately */ }
+function setCardState(id, state, src, generator, fluxPrompt, sdPrompt, errMsg) {
+  const ld   = document.getElementById(`card-ld-${id}`)
+  const ph   = document.getElementById(`card-ph-${id}`)
+  const er   = document.getElementById(`card-er-${id}`)
+  const img  = document.getElementById(`card-img-${id}`)
+  const foot = document.getElementById(`card-foot-${id}`)
+
+  ld.style.display   = 'none'
+  ph.style.display   = 'none'
+  er.style.display   = 'none'
+  img.style.display  = 'none'
+  foot.classList.remove('show')
+
+  if(state === 'ld') {
+    ld.style.display = 'flex'
+  } else if(state === 'er') {
+    er.style.display = 'flex'
+    document.getElementById(`card-er-txt-${id}`).textContent = errMsg || 'Generation failed.'
+  } else if(state === 'img') {
+    img.src = src
+    img.style.display = 'block'
+    foot.classList.add('show')
+    document.getElementById(`card-dl-${id}`).href = src
+    const badge = document.getElementById(`card-badge-${id}`)
+    badge.querySelector('span:last-child').textContent = generator
+    // Store both prompts for the drawer
+    const drawer = document.getElementById(`card-drawer-${id}`)
+    const isFlux = generator.includes('Flux') || generator.includes('Pollinations')
+    drawer.dataset.fluxPrompt = fluxPrompt || ''
+    drawer.dataset.sdPrompt   = sdPrompt   || ''
+    drawer.dataset.generator  = generator  || ''
+  }
 }
 
-function show(id, d='block') { document.getElementById(id).style.display = d }
-function hide(id) { document.getElementById(id).style.display = 'none' }
-
-function toast(msg, type='') {
-  const el = document.getElementById('toast')
-  el.textContent = msg
-  el.className = 'toast on' + (type ? ' '+type : '')
-  clearTimeout(el._t)
-  el._t = setTimeout(() => el.className = 'toast', 3200)
+function setCardMsg(id, msg) {
+  const el = document.getElementById(`card-msg-${id}`)
+  if(el) el.textContent = msg
 }
 
+function toggleCardPrompt(id) {
+  const drawer = document.getElementById(`card-drawer-${id}`)
+  if(!drawer) return
+  const isOpen = drawer.classList.contains('open')
+  if(!isOpen) {
+    const gen = drawer.dataset.generator || ''
+    const isFlux = gen.includes('Pollinations')
+    const prompt = isFlux ? drawer.dataset.fluxPrompt : drawer.dataset.sdPrompt
+    const label  = isFlux ? 'FLUX prompt (natural language):' : 'SD prompt (weighted tags):'
+    drawer.innerHTML = `<span style="color:var(--accent);font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;">${label}</span><br><br>${prompt}`
+  }
+  drawer.classList.toggle('open')
+}
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+function setStyle(el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'))
+  el.classList.add('on')
+  activeStyle = el.dataset.s
+}
+function setRatio(el) {
+  document.querySelectorAll('#ratioRow .s-btn').forEach(b => b.classList.remove('on'))
+  el.classList.add('on')
+  imgW = parseInt(el.dataset.w)
+  imgH = parseInt(el.dataset.h)
+}
+function setVar(el) {
+  document.querySelectorAll('#varRow .s-btn').forEach(b => b.classList.remove('on'))
+  el.classList.add('on')
+  varCount = parseInt(el.dataset.v)
+  // Update the placeholder grid
+  const grid = document.getElementById('outGrid')
+  if(!grid.querySelector('.out-card .card-ld')) {
+    grid.className = `out-grid n${varCount === 1 ? 1 : 2}`
+    grid.innerHTML = Array.from({length: varCount}, () => `
+      <div class="out-card">
+        <div class="card-ph"><div class="card-ph-icon">✦</div></div>
+      </div>`).join('')
+  }
+}
 function grow(el) {
   el.style.height = 'auto'
   el.style.height = Math.min(el.scrollHeight, 200) + 'px'
@@ -623,41 +652,28 @@ function grow(el) {
 function onKey(e) {
   if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate() }
 }
-function togglePR() {
-  const b = document.getElementById('prBody')
-  const a = document.getElementById('prArr')
-  b.classList.toggle('on')
-  a.textContent = b.classList.contains('on') ? '▼' : '▶'
-}
-
-// ─── Style & ratio ────────────────────────────────────────────────────────────
-function setStyle(el) {
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'))
-  el.classList.add('on')
-  activeStyle = el.dataset.s
-}
-function setRatio(el) {
-  document.querySelectorAll('.r-btn').forEach(b => b.classList.remove('on'))
-  el.classList.add('on')
-  imgW = parseInt(el.dataset.w)
-  imgH = parseInt(el.dataset.h)
+function showToast(msg, type='') {
+  const el = document.getElementById('toast')
+  el.textContent = msg
+  el.className = 'toast on' + (type ? ' '+type : '')
+  clearTimeout(el._t)
+  el._t = setTimeout(() => el.className = 'toast', 3200)
 }
 
 // ─── History ──────────────────────────────────────────────────────────────────
 function addHistory(src, idea) {
   history.unshift({ src, idea })
-  if(history.length > 16) history.pop()
+  if(history.length > 20) history.pop()
   renderHistory()
 }
 function renderHistory() {
-  if(!history.length) { hide('histWrap'); return }
-  show('histWrap')
+  if(!history.length) { document.getElementById('histWrap').style.display = 'none'; return }
+  document.getElementById('histWrap').style.display = 'block'
   document.getElementById('histGrid').innerHTML = history.map((item, i) => `
     <div class="hi" onclick="loadHist(${i})" title="${item.idea}">
       <img src="${item.src}" alt="" loading="lazy">
       <div class="hi-ov"><span>↑ Load</span></div>
-    </div>
-  `).join('')
+    </div>`).join('')
 }
 function loadHist(i) {
   const el = document.getElementById('idea')
@@ -668,7 +684,7 @@ function loadHist(i) {
 function clearHistory() {
   history = []
   renderHistory()
-  toast('History cleared', 'ok')
+  showToast('History cleared', 'ok')
 }
 </script>
 </body>
