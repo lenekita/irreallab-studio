@@ -495,7 +495,7 @@ async function stableHorde(prompt, seed, slotId) {
   w = Math.max(w, 512); h = Math.max(h, 512)
 
   const body = {
-    prompt: `${prompt} ### ${SD_NEG}`,
+    prompt,
     params: {
       sampler_name: 'k_euler',
       cfg_scale: 7.5,
@@ -504,8 +504,9 @@ async function stableHorde(prompt, seed, slotId) {
       seed,
       n: 1,
       karras: false,
+      negative_prompt: SD_NEG,
     },
-    models: ['Deliberate'],
+    models: ['Dreamshaper 8'],  // More available than Deliberate
     r2: true,
     shared: false,
     nsfw: false,
