@@ -10,7 +10,7 @@
   --bg:#07070f;--s1:#0e0e1c;--s2:#16162a;--border:#252540;--bh:#3a3a65;
   --text:#eeeeff;--muted:#8888bb;
   --pu:#8b5cf6;--pul:#a78bfa;--pud:#5b21b6;
-  --gr:#10b981;--re:#f87171;--bl:#3b82f6;--pi:#ec4899;
+  --gr:#10b981;--re:#f87171;--bl:#3b82f6;
 }
 
 body{
@@ -27,20 +27,18 @@ body::before{
     radial-gradient(ellipse 40% 30% at 50% 50%, rgba(236,72,153,.05) 0%, transparent 60%);
 }
 
-.wrap{max-width:1100px;margin:0 auto;padding:32px 20px;position:relative;z-index:1}
+.wrap{max-width:860px;margin:0 auto;padding:32px 20px;position:relative;z-index:1}
 
 /* ── header ── */
 header{
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;align-items:center;gap:14px;
   margin-bottom:32px;
 }
-.logo{display:flex;align-items:center;gap:14px}
 .logo-icon{
-  width:46px;height:46px;border-radius:13px;
+  width:46px;height:46px;border-radius:13px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;font-size:23px;
   background:linear-gradient(135deg,var(--pud),var(--pu) 50%,var(--bl));
   box-shadow:0 0 24px rgba(139,92,246,.35);
-  flex-shrink:0;
 }
 .logo-text h1{
   font-size:20px;font-weight:700;letter-spacing:-.3px;
@@ -48,48 +46,28 @@ header{
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .logo-text p{font-size:11px;color:var(--muted);margin-top:2px}
-.gear-btn{
-  width:42px;height:42px;border-radius:11px;
-  background:var(--s2);border:1px solid var(--border);
-  color:var(--muted);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:18px;
-  transition:.18s;flex-shrink:0;
-}
-.gear-btn:hover{border-color:var(--pu);color:var(--text);background:var(--s1)}
 
-/* ── free bar ── */
+/* ── free chip ── */
 .free-bar{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:10px;
   background:var(--s1);border:1px solid rgba(16,185,129,.3);
-  border-radius:13px;padding:13px 18px;margin-bottom:12px;font-size:13px;
+  border-radius:13px;padding:13px 18px;margin-bottom:28px;font-size:13px;
+  color:var(--muted);
 }
-.chip{
+.chip-green{
   padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;
   text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;
+  background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)
 }
-.chip-green{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
-.chip-yellow{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
-.free-bar span{color:var(--muted);flex:1}
-.free-bar a{color:var(--pul);cursor:pointer;text-decoration:underline}
 
-/* ── key banner ── */
-.key-banner{
-  background:var(--s1);border:1px solid rgba(139,92,246,.3);
-  border-radius:12px;padding:12px 18px;margin-bottom:28px;
-  font-size:13px;color:var(--muted);
-  display:flex;align-items:center;gap:10px;
-}
-.key-banner a{color:var(--pul);cursor:pointer;text-decoration:underline}
-.key-banner.off{display:none}
-
-/* ── input section ── */
+/* ── input ── */
 .input-label{
   display:block;font-size:11px;text-transform:uppercase;
   letter-spacing:.1em;color:var(--muted);margin-bottom:10px;
 }
 .ibox{position:relative;margin-bottom:36px}
 textarea.idea{
-  width:100%;padding:18px 150px 18px 20px;
+  width:100%;padding:18px 160px 18px 20px;
   background:var(--s1);border:1px solid var(--border);
   border-radius:16px;color:var(--text);font-size:15px;
   font-family:inherit;line-height:1.6;
@@ -125,26 +103,20 @@ textarea.idea:focus{
 .gen-btn.busy .lbl{display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── grid ── */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:680px){.grid{grid-template-columns:1fr}}
-
 /* ── card ── */
 .card{
   background:var(--s1);border:1px solid var(--border);
-  border-radius:20px;overflow:hidden;transition:.2s;
+  border-radius:20px;overflow:hidden;
 }
-.card:hover{border-color:var(--bh)}
 .ch{
   padding:14px 17px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:10px;
 }
-.badge{
+.badge-p{
   padding:3px 11px;border-radius:20px;
   font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  background:rgba(139,92,246,.18);color:var(--pul);border:1px solid rgba(139,92,246,.3)
 }
-.badge-p{background:rgba(139,92,246,.18);color:var(--pul);border:1px solid rgba(139,92,246,.3)}
-.badge-g{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.3)}
 .cmodel{font-size:12px;color:var(--muted);flex:1}
 .fc{
   font-size:10px;color:var(--gr);
@@ -166,17 +138,23 @@ textarea.idea:focus{
   align-items:center;justify-content:center;gap:14px;
   padding:20px;text-align:center;
 }
-.ph-ico{font-size:40px;opacity:.18}
-.ph-txt{font-size:13px;color:var(--muted);line-height:1.5}
+.ph-ico{font-size:48px;opacity:.15}
+.ph-txt{font-size:14px;color:var(--muted);line-height:1.6;max-width:320px}
 .ring{
   width:50px;height:50px;
   border:3px solid var(--border);border-top-color:var(--pu);
   border-radius:50%;animation:spin .8s linear infinite;
 }
-.ring-b{border-top-color:var(--bl)}
 .lt{font-size:13px;color:var(--muted)}
 .err-ico{font-size:30px}
-.err-txt{font-size:12px;color:var(--re);max-width:260px;line-height:1.55}
+.err-txt{font-size:12px;color:var(--re);max-width:300px;line-height:1.6}
+.retry-btn{
+  margin-top:8px;padding:7px 16px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;
+  transition:.15s;
+}
+.retry-btn:hover{border-color:var(--pu);color:var(--text)}
 .card-img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 
 /* card footer */
@@ -193,74 +171,9 @@ textarea.idea:focus{
   color:var(--muted);line-height:1.6;
   background:var(--s2);padding:10px 13px;
   border-radius:8px;border:1px solid var(--border);
+  word-break:break-word;
 }
 .ptxt.on{display:block}
-
-/* ── modal ── */
-.overlay{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.75);backdrop-filter:blur(12px);
-  display:none;align-items:center;justify-content:center;z-index:100;
-}
-.overlay.on{display:flex}
-.modal{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:22px;padding:28px;
-  width:100%;max-width:490px;margin:18px;
-  animation:slideUp .2s ease;
-}
-@keyframes slideUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
-.mh h2{font-size:18px;font-weight:600}
-.xbtn{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--s2);border:1px solid var(--border);
-  color:var(--muted);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;transition:.15s;
-}
-.xbtn:hover{border-color:var(--re);color:var(--re)}
-
-.svc{
-  display:flex;align-items:center;gap:13px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:13px;padding:14px 16px;margin-bottom:14px;
-}
-.svc-ico{font-size:22px;flex-shrink:0}
-.svc-info{flex:1}
-.svc-name{font-size:13px;font-weight:600}
-.svc-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.svc-st{font-size:11px;font-weight:700;white-space:nowrap}
-.svc-st.ok{color:var(--gr)}.svc-st.need{color:#fbbf24}
-
-.field{margin-top:20px}
-.field label{
-  display:flex;align-items:center;gap:8px;
-  font-size:13px;font-weight:500;margin-bottom:9px;
-}
-.dot{width:8px;height:8px;border-radius:50%}
-.dot.ok{background:var(--gr)}.dot.no{background:var(--muted)}
-.field input{
-  width:100%;padding:12px 14px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:10px;color:var(--text);
-  font-size:13px;font-family:'Monaco','Menlo',monospace;
-  outline:none;transition:.18s;
-}
-.field input:focus{border-color:var(--pu);box-shadow:0 0 0 2px rgba(139,92,246,.12)}
-.field input::placeholder{color:var(--muted);font-family:inherit}
-.hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
-.hint a{color:var(--pul)}
-.savebtn{
-  width:100%;padding:13px;margin-top:18px;
-  background:linear-gradient(135deg,var(--pud),var(--pu));
-  border:none;border-radius:11px;color:#fff;
-  font-size:14px;font-weight:600;cursor:pointer;transition:.18s;
-}
-.savebtn:hover{opacity:.88}
 
 /* ── toast ── */
 .toast{
@@ -279,29 +192,17 @@ textarea.idea:focus{
 
   <!-- Header -->
   <header>
-    <div class="logo">
-      <div class="logo-icon">🎨</div>
-      <div class="logo-text">
-        <h1>IRREALLAB STUDIO</h1>
-        <p>FLUX &amp; Gemini Image Generation</p>
-      </div>
+    <div class="logo-icon">🎨</div>
+    <div class="logo-text">
+      <h1>IRREALLAB STUDIO</h1>
+      <p>AI Image Generation · Powered by Pollinations FLUX</p>
     </div>
-    <button class="gear-btn" onclick="openSettings()" title="Settings">⚙</button>
   </header>
 
   <!-- Free bar -->
   <div class="free-bar">
-    <span class="chip chip-green">100% Free</span>
-    <span>Pollinations works instantly — no account needed.
-      Add a free Gemini key to generate with both models.
-      <a onclick="openSettings()">Add Gemini key →</a>
-    </span>
-  </div>
-
-  <!-- Key needed banner -->
-  <div class="key-banner" id="keyBanner">
-    🔑 <span>Optional: add a free Gemini API key to enable the second image generator.
-    <a onclick="openSettings()">Add key →</a></span>
+    <span class="chip-green">100% Free</span>
+    <span>No account or API key needed — generate unlimited images instantly.</span>
   </div>
 
   <!-- Input -->
@@ -317,110 +218,36 @@ textarea.idea:focus{
     </button>
   </div>
 
-  <!-- Cards grid -->
-  <div class="grid">
-
-    <!-- Pollinations card -->
-    <div class="card">
-      <div class="ch">
-        <span class="badge badge-p">Pollinations</span>
-        <span class="cmodel">FLUX · by Pollinations.ai</span>
-        <span class="fc">FREE</span>
-        <a class="dl" id="pdl" style="display:none" title="Download">↓</a>
-      </div>
-      <div class="cb" id="pph">
-        <div class="ph-ico">🖼</div>
-        <div class="ph-txt">Your FLUX image will appear here</div>
-      </div>
-      <div class="cb" id="pld" style="display:none">
-        <div class="ring"></div>
-        <div class="lt">Generating with FLUX…</div>
-      </div>
-      <div class="cb" id="perr" style="display:none">
-        <div class="err-ico">⚠️</div>
-        <div class="err-txt" id="perrtxt"></div>
-      </div>
-      <img class="card-img" id="pimg" style="display:none" alt="FLUX result">
-      <div class="cf" id="pcf" style="display:none">
-        <button class="pt" onclick="tog('p')">
-          <span id="parr">▶</span> View crafted prompt
-        </button>
-        <div class="ptxt" id="pptxt"></div>
-      </div>
+  <!-- Card -->
+  <div class="card">
+    <div class="ch">
+      <span class="badge-p">Pollinations</span>
+      <span class="cmodel">FLUX · by Pollinations.ai</span>
+      <span class="fc">FREE</span>
+      <a class="dl" id="pdl" style="display:none" title="Download image">↓</a>
     </div>
-
-    <!-- Gemini card -->
-    <div class="card">
-      <div class="ch">
-        <span class="badge badge-g">Gemini</span>
-        <span class="cmodel">Flash Image · by Google</span>
-        <span class="fc">FREE</span>
-        <a class="dl" id="gdl" style="display:none" title="Download">↓</a>
-      </div>
-      <div class="cb" id="gph">
-        <div class="ph-ico">🖼</div>
-        <div class="ph-txt" id="gphTxt">Add a free Gemini key in ⚙ Settings to enable</div>
-      </div>
-      <div class="cb" id="gld" style="display:none">
-        <div class="ring ring-b"></div>
-        <div class="lt">Generating with Gemini…</div>
-      </div>
-      <div class="cb" id="gerr" style="display:none">
-        <div class="err-ico">⚠️</div>
-        <div class="err-txt" id="gerrtxt"></div>
-      </div>
-      <img class="card-img" id="gimg" style="display:none" alt="Gemini result">
-      <div class="cf" id="gcf" style="display:none">
-        <button class="pt" onclick="tog('g')">
-          <span id="garr">▶</span> View crafted prompt
-        </button>
-        <div class="ptxt" id="gptxt"></div>
-      </div>
+    <div class="cb" id="pph">
+      <div class="ph-ico">🖼</div>
+      <div class="ph-txt">Type your image idea above and hit Generate — no sign-up required.</div>
     </div>
-
+    <div class="cb" id="pld" style="display:none">
+      <div class="ring"></div>
+      <div class="lt">Generating your image…</div>
+    </div>
+    <div class="cb" id="perr" style="display:none">
+      <div class="err-ico">⚠️</div>
+      <div class="err-txt" id="perrtxt"></div>
+      <button class="retry-btn" onclick="retry()">↺ Try again</button>
+    </div>
+    <img class="card-img" id="pimg" style="display:none" alt="Generated image">
+    <div class="cf" id="pcf" style="display:none">
+      <button class="pt" onclick="tog()">
+        <span id="parr">▶</span> View crafted prompt
+      </button>
+      <div class="ptxt" id="pptxt"></div>
+    </div>
   </div>
-</div>
 
-<!-- Settings modal -->
-<div class="overlay" id="modal" onclick="bgClose(event)">
-  <div class="modal">
-    <div class="mh">
-      <h2>⚙ Settings</h2>
-      <button class="xbtn" onclick="closeSettings()">✕</button>
-    </div>
-
-    <div class="svc">
-      <div class="svc-ico">🌸</div>
-      <div class="svc-info">
-        <div class="svc-name">Pollinations.ai — FLUX</div>
-        <div class="svc-sub">No account or key needed. Always free.</div>
-      </div>
-      <div class="svc-st ok">✓ Ready</div>
-    </div>
-
-    <div class="svc">
-      <div class="svc-ico">✦</div>
-      <div class="svc-info">
-        <div class="svc-name">Gemini Flash Image</div>
-        <div class="svc-sub">Free API key required — ~500 images / day free.</div>
-      </div>
-      <div class="svc-st" id="gSt">Needs key</div>
-    </div>
-
-    <div class="field">
-      <label><span class="dot" id="gdot"></span> Gemini API Key</label>
-      <input type="password" id="gkey" placeholder="AIza…" autocomplete="off"
-             onkeydown="if(event.key==='Enter')saveKey()">
-      <div class="hint">
-        Free at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a>
-        — sign in with Google → Create API key. Done in 30 seconds.
-        <br><br>
-        🔒 Your key is saved only in this browser (localStorage). It never leaves your device.
-      </div>
-    </div>
-
-    <button class="savebtn" onclick="saveKey()">Save Key</button>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -429,146 +256,64 @@ textarea.idea:focus{
 // ─── Prompt engineering ───────────────────────────────────────────────────────
 
 const STYLE_MAP = {
-  realistic:    ["photorealistic, cinematic, shot on Sony A7R V, 8K",
-                 "photorealistic, hyperrealistic, lifelike, high detail, 4K"],
-  photo:        ["documentary photography, professional camera, natural light",
-                 "professional photography, DSLR, sharp focus, 4K"],
-  cartoon:      ["vibrant cartoon illustration, bold outlines, digital art",
-                 "cartoon illustration, bold colors, animated style"],
-  anime:        ["anime style, detailed, vibrant, Studio Ghibli inspired",
-                 "anime, manga style, detailed illustration"],
-  watercolor:   ["watercolor painting, soft flowing brushstrokes, artistic",
-                 "watercolor art, soft tones, traditional painting"],
-  "oil painting":["oil painting, thick brushwork, classical technique",
-                 "oil on canvas, classical painting, detailed"],
-  "3d":         ["3D render, Octane render, volumetric lighting, 8K",
-                 "3D CGI render, high poly, professional lighting"],
-  cyberpunk:    ["cyberpunk aesthetic, neon lights, rain-soaked streets",
-                 "cyberpunk, neon, futuristic dystopia"],
-  fantasy:      ["epic fantasy art, magical atmosphere, cinematic, intricate detail",
-                 "fantasy art, magical, epic scene, detailed"],
-  portrait:     ["studio portrait photography, Rembrandt lighting, bokeh",
-                 "professional portrait, studio lighting, sharp eyes, bokeh"],
-  landscape:    ["landscape photography, ultra-wide angle, golden hour",
-                 "landscape, wide angle, dramatic sky, golden light"],
-  abstract:     ["abstract digital art, vivid colours, geometric tension",
-                 "abstract art, colorful, modern design"],
-  vintage:      ["vintage film photograph, Kodak grain, warm tones, 1970s",
-                 "vintage, retro, film grain, warm analog tones"],
-  minimalist:   ["minimalist composition, negative space, clean lines",
-                 "minimalist, clean, simple, elegant design"],
-  sketch:       ["detailed pencil sketch, fine hatching, technical illustration",
-                 "pencil drawing, sketch, detailed line art"],
+  realistic:     "photorealistic, cinematic, shot on Sony A7R V, 8K",
+  photo:         "documentary photography, professional camera, natural light",
+  cartoon:       "vibrant cartoon illustration, bold outlines, digital art",
+  anime:         "anime style, detailed, vibrant, Studio Ghibli inspired",
+  watercolor:    "watercolor painting, soft flowing brushstrokes, artistic",
+  "oil painting":"oil painting, thick brushwork, classical technique",
+  "3d":          "3D render, Octane render, volumetric lighting, 8K",
+  cyberpunk:     "cyberpunk aesthetic, neon lights, rain-soaked streets",
+  fantasy:       "epic fantasy art, magical atmosphere, cinematic, intricate detail",
+  portrait:      "studio portrait photography, Rembrandt lighting, bokeh",
+  landscape:     "landscape photography, ultra-wide angle, golden hour",
+  abstract:      "abstract digital art, vivid colours, geometric tension",
+  vintage:       "vintage film photograph, Kodak grain, warm tones, 1970s",
+  minimalist:    "minimalist composition, negative space, clean lines",
+  sketch:        "detailed pencil sketch, fine hatching, technical illustration",
 }
 
 const NIGHT = new Set(["night","dark","moon","stars","star","lunar","midnight","space","galaxy","twilight"])
 const WARM  = new Set(["sunset","sunrise","dawn","dusk","golden"])
 
-function lightingFor(idea){
-  const w = idea.toLowerCase().split(/\W+/)
-  if(w.some(x=>NIGHT.has(x)))
-    return ["moonlight, deep blue night sky, ethereal glow, long shadows",
-            "moonlight, night sky, ethereal lighting, deep blue"]
-  if(w.some(x=>WARM.has(x)))
-    return ["golden hour warm light, long dramatic shadows",
-            "golden hour, warm tones, dramatic shadows"]
-  return ["soft natural lighting, perfect exposure, sharp focus",
-          "professional lighting, sharp focus, clear"]
-}
-
-function craftPrompts(idea){
+function craftPrompt(idea){
   const low = idea.toLowerCase()
-  let fluxStyle   = "photorealistic, cinematic, 8K, professional photography"
-  let geminiStyle = "photorealistic, hyperrealistic, high detail, 4K"
-
-  for(const [kw,[fs,gs]] of Object.entries(STYLE_MAP)){
-    if(low.includes(kw)){ fluxStyle=fs; geminiStyle=gs; break }
+  let style = "photorealistic, cinematic, 8K, professional photography"
+  for(const [kw, s] of Object.entries(STYLE_MAP)){
+    if(low.includes(kw)){ style = s; break }
   }
-
-  const [fl, gl] = lightingFor(idea)
-
-  return {
-    flux:   `${idea}, ${fluxStyle}, ${fl}, intricate detail, rule of thirds, award-winning`,
-    gemini: `${idea}, ${geminiStyle}, ${gl}, high detail, award-winning photography, professional`,
-  }
+  const words = low.split(/\W+/)
+  let lighting = "soft natural lighting, perfect exposure, sharp focus"
+  if(words.some(x => NIGHT.has(x))) lighting = "moonlight, deep blue night sky, ethereal glow"
+  else if(words.some(x => WARM.has(x))) lighting = "golden hour warm light, long dramatic shadows"
+  return `${idea}, ${style}, ${lighting}, intricate detail, rule of thirds, award-winning`
 }
 
 // ─── Image generation ─────────────────────────────────────────────────────────
 
+let lastPrompt = ""
+
 async function genPollinations(prompt){
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=1024&seed=${Math.floor(Math.random()*99999)}`
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*999999)}`
   const r = await fetch(url)
-  if(!r.ok) throw new Error(`Pollinations error ${r.status}`)
+  if(!r.ok) throw new Error(`Service returned ${r.status} — please try again in a moment.`)
   const blob = await r.blob()
+  if(!blob.type.startsWith('image/')) throw new Error('Unexpected response — please try again.')
   return URL.createObjectURL(blob)
 }
 
-async function genGemini(prompt, apiKey){
-  const models = [
-    "gemini-2.0-flash-preview-image-generation",
-    "gemini-2.0-flash-exp-image-generation",
-  ]
-  let lastErr = ""
-  for(const model of models){
-    try{
-      console.log('Gemini: Trying model:', model)
-      const r = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({
-            contents:[{parts:[{text:prompt}]}],
-            generationConfig:{responseModalities:["IMAGE","TEXT"]}
-          })
-        }
-      )
-      console.log('Gemini: Response status:', r.status)
-      if(!r.ok){ lastErr=await r.text(); console.log('Gemini error:', lastErr); continue }
-      const data = await r.json()
-      console.log('Gemini: Got response')
-      for(const part of data.candidates[0].content.parts){
-        if(part.inlineData){
-          const {data:b64, mimeType} = part.inlineData
-          const blob = b64toBlob(b64, mimeType||"image/png")
-          return URL.createObjectURL(blob)
-        }
-      }
-    }catch(e){ lastErr=e.message; console.log('Gemini exception:', e) }
-  }
-  // Parse friendly error from lastErr JSON string
-  try {
-    const parsed = JSON.parse(lastErr)
-    const msg = parsed?.error?.message || lastErr
-    if(msg.includes("API key not valid") || msg.includes("API_KEY_INVALID") || msg.includes("invalid_api_key"))
-      throw new Error("Invalid Gemini key. Regenerate it at aistudio.google.com/app/apikey")
-    throw new Error("Gemini: " + msg)
-  } catch(e2) {
-    if(e2.message.startsWith("Gemini:") || e2.message.startsWith("Invalid"))
-      throw e2
-    throw new Error("Gemini: " + lastErr.substring(0, 100))
-  }
-}
+// ─── UI ───────────────────────────────────────────────────────────────────────
 
-function b64toBlob(b64, type){
-  const bin = atob(b64)
-  const arr = new Uint8Array(bin.length)
-  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i)
-  return new Blob([arr],{type})
-}
-
-// ─── UI helpers ───────────────────────────────────────────────────────────────
-
-function show(id,flex){ document.getElementById(id).style.display = flex?'flex':'block' }
+function show(id, flex){ document.getElementById(id).style.display = flex ? 'flex' : 'block' }
 function hide(id){ document.getElementById(id).style.display = 'none' }
-function setText(id,t){ document.getElementById(id).textContent = t }
+function setText(id, t){ document.getElementById(id).textContent = t }
 
 function toast(msg, type=''){
   const el = document.getElementById('toast')
   el.textContent = msg
-  el.className = 'toast on' + (type?' '+type:'')
+  el.className = 'toast on' + (type ? ' '+type : '')
   clearTimeout(el._t)
-  el._t = setTimeout(()=>el.className='toast', 3200)
+  el._t = setTimeout(() => el.className = 'toast', 3200)
 }
 
 function grow(el){
@@ -577,117 +322,64 @@ function grow(el){
 }
 
 function onKey(e){
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); generate() }
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); generate() }
 }
 
-function tog(p){
-  const t = document.getElementById(p+'ptxt')
-  const a = document.getElementById(p+'arr')
+function tog(){
+  const t = document.getElementById('pptxt')
+  const a = document.getElementById('parr')
   t.classList.toggle('on')
   a.textContent = t.classList.contains('on') ? '▼' : '▶'
 }
 
-function cardState(p, state){
-  for(const s of ['ph','ld','err','img','cf']){
-    const el = document.getElementById(p+s)
-    if(el) el.style.display = 'none'
+function setState(state){
+  for(const s of ['pph','pld','perr','pimg','pcf']){
+    document.getElementById(s).style.display = 'none'
   }
-  if(state==='ph')  show(p+'ph', true)
-  else if(state==='ld')  show(p+'ld', true)
-  else if(state==='err') show(p+'err', true)
-  else if(state==='img'){ show(p+'img'); show(p+'cf') }
+  hide('pdl')
+  if(state === 'ph')  show('pph', true)
+  if(state === 'ld')  show('pld', true)
+  if(state === 'err') show('perr', true)
+  if(state === 'img'){ show('pimg'); show('pcf') }
 }
-
-// ─── Settings ─────────────────────────────────────────────────────────────────
-
-function getKey(){ return localStorage.getItem('GEMINI_KEY')||'' }
-
-function refreshKeyStatus(){
-  const has = !!getKey()
-  document.getElementById('gdot').className   = 'dot '+(has?'ok':'no')
-  document.getElementById('gSt').textContent  = has ? '✓ Ready' : 'Needs key'
-  document.getElementById('gSt').className    = 'svc-st '+(has?'ok':'need')
-  document.getElementById('keyBanner').classList.toggle('off', has)
-  if(has) setText('gphTxt','Gemini image will appear here')
-}
-
-function openSettings(){
-  document.getElementById('modal').classList.add('on')
-}
-function closeSettings(){
-  document.getElementById('modal').classList.remove('on')
-  refreshKeyStatus()
-}
-function bgClose(e){
-  if(e.target===document.getElementById('modal')) closeSettings()
-}
-function saveKey(){
-  const k = document.getElementById('gkey').value.trim()
-  if(!k){ toast('Paste your Gemini API key first','er'); return }
-
-  localStorage.setItem('GEMINI_KEY', k)
-  document.getElementById('gkey').value = ''
-  toast('Gemini key saved! ✓','ok')
-  closeSettings()
-}
-
-// ─── Generate ─────────────────────────────────────────────────────────────────
 
 async function generate(){
   const idea = document.getElementById('idea').value.trim()
-  if(!idea){ toast('Enter an image idea first','er'); return }
+  if(!idea){ toast('Enter an image idea first', 'er'); return }
 
   const btn = document.getElementById('genBtn')
   btn.disabled = true
   btn.classList.add('busy')
+  setState('ld')
 
-  cardState('p','ld')
-  cardState('g','ld')
-  hide('pdl'); hide('gdl')
+  const prompt = craftPrompt(idea)
+  lastPrompt = prompt
 
-  const prompts = craftPrompts(idea)
-  const geminiKey = getKey()
-
-  console.log('Keys found:', {geminiKey: !!geminiKey})
-
-  // Run both in parallel
-  const tasks = [
-    genPollinations(prompts.flux)
-      .then(src => showResult('p', src, prompts.flux, 'pollinations'))
-      .catch(err => showError('p', err.message)),
-
-    geminiKey
-      ? genGemini(prompts.gemini, geminiKey)
-          .then(src => showResult('g', src, prompts.gemini, 'gemini'))
-          .catch(err => showError('g', err.message))
-      : Promise.resolve(cardState('g','ph')),
-  ]
-
-  await Promise.allSettled(tasks)
+  try {
+    const src = await genPollinations(prompt)
+    const img = document.getElementById('pimg')
+    img.src = src
+    setState('img')
+    setText('pptxt', prompt)
+    const dl = document.getElementById('pdl')
+    dl.href = src
+    dl.download = `irreallab-${Date.now()}.png`
+    show('pdl', true)
+  } catch(e) {
+    setState('err')
+    setText('perrtxt', e.message)
+  }
 
   btn.disabled = false
   btn.classList.remove('busy')
 }
 
-function showResult(p, blobUrl, prompt, prefix){
-  const img = document.getElementById(p+'img')
-  img.src = blobUrl
-  cardState(p,'img')
-  setText(p+'ptxt', prompt)
-
-  const dl = document.getElementById(p+'dl')
-  dl.href = blobUrl
-  dl.download = `${prefix}-${Date.now()}.png`
-  show(p+'dl', true)
+function retry(){
+  if(lastPrompt){
+    document.getElementById('idea').dispatchEvent(new Event('input'))
+    generate()
+  }
 }
-
-function showError(p, msg){
-  cardState(p,'err')
-  setText(p+'errtxt', msg)
-}
-
-// ─── Init ─────────────────────────────────────────────────────────────────────
-refreshKeyStatus()
 </script>
 </body>
 </html>
