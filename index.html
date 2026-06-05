@@ -463,21 +463,20 @@ async function stableHorde(prompt, seed, slotId) {
   else           { h = maxDim; w = Math.round(maxDim * ratio / 64) * 64 }
   w = Math.max(w, 512); h = Math.max(h, 512)
 
-  // Stable Diffusion request — maximum quality settings
+  // Stable Diffusion request — use minimal working config
   const body = {
     prompt,
     negative_prompt: SD_NEG,
     params: {
-      sampler_name: 'k_dpmpp_2m',  // Valid sampler from API
-      cfg_scale: 8.5,
+      sampler_name: 'k_euler_a',
+      cfg_scale: 8,
       width: w,
       height: h,
-      steps: 35,
+      steps: 30,
       seed: String(seed),
       n: 1,
       karras: true,
     },
-    models: ['DreamShaper 8', 'Deliberate', 'AingDream'],
     r2: true,
     nsfw: false,
   }
