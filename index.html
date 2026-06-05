@@ -462,23 +462,34 @@ function pollinationsDirect(prompt, seed, slotId) {
     setCardMsg(slotId, 'Trying Pollinations FLUX…')
     const img = new Image()
     const urls = [
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux-pro&seed=${seed}`,
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&seed=${seed}`,
       `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}`,
       `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`,
     ]
     let urlIdx = 0
-    const tid = setTimeout(() => { img.src = ''; reject(new Error('timeout')) }, 40000)
+    const tid = setTimeout(() => { img.src = ''; reject(new Error('Pollinations timeout')) }, 45000)
 
     const tryNext = () => {
       if(urlIdx >= urls.length) {
         clearTimeout(tid)
-        reject(new Error('Pollinations unavailable'))
+        console.warn('All Pollinations URLs failed')
+        reject(new Error('Pollinations all variants failed'))
         return
       }
+      console.log(`Pollinations attempt ${urlIdx + 1}: ${urls[urlIdx]}`)
       img.src = urls[urlIdx++]
     }
 
-    img.onload  = () => { clearTimeout(tid); resolve({ src: img.currentSrc, generator: 'Pollinations FLUX' }) }
-    img.onerror = tryNext
+    img.onload  = () => {
+      clearTimeout(tid)
+      console.log('Pollinations succeeded:', img.currentSrc)
+      resolve({ src: img.currentSrc, generator: 'Pollinations FLUX' })
+    }
+    img.onerror = () => {
+      console.warn(`Pollinations URL ${urlIdx} failed`)
+      tryNext()
+    }
     tryNext()
   })
 }
@@ -494,21 +505,21 @@ async function stableHorde(prompt, seed, slotId) {
   else           { h = maxDim; w = Math.round(maxDim * ratio / 64) * 64 }
   w = Math.max(w, 512); h = Math.max(h, 512)
 
-  // Minimal, known-good request structure for Stable Horde
+  // Stable Diffusion request — optimised for quality
   const body = {
     prompt,
     negative_prompt: SD_NEG,
     params: {
-      sampler_name: 'k_euler_a',
-      cfg_scale: 7.5,
+      sampler_name: 'k_dpmpp_sde_karras',
+      cfg_scale: 8,
       width: w,
       height: h,
-      steps: 20,
-      seed: String(seed),  // MUST be string, not number!
+      steps: 30,
+      seed: String(seed),
       n: 1,
       karras: true,
     },
-    models: [],
+    models: ['Deliberate', 'DreamShaper 8', 'ICBINP - Illustration'],
     r2: true,
     nsfw: false,
   }
