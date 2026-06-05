@@ -747,6 +747,8 @@ async function generate(){
   const geminiKey = getGeminiKey()
   const openaiKey = getOpenAIKey()
 
+  console.log('Keys found:', {geminiKey: !!geminiKey, openaiKey: !!openaiKey})
+
   // Run all three in parallel
   const tasks = [
     genPollinations(prompts.flux)
