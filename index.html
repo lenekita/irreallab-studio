@@ -3,323 +3,621 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IRREALLAB STUDIO</title>
+<title>IRREALLAB STUDIO — AI Image Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#07070f;--s1:#0e0e1c;--s2:#16162a;--border:#252540;--bh:#3a3a65;
-  --text:#eeeeff;--muted:#8888bb;
-  --pu:#8b5cf6;--pul:#a78bfa;--pud:#5b21b6;
-  --gr:#10b981;--re:#f87171;--bl:#3b82f6;
+:root {
+  --bg: #060606;
+  --accent: #d4f03a;
+  --text: #ede9df;
+  --muted: #4a4a4a;
+  --s1: #0d0d0d;
+  --s2: #111;
+  --border: #1c1c1c;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh;
 }
 
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  min-height:100vh;
-}
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+/* Ambient gradient */
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
   background:
-    radial-gradient(ellipse 65% 45% at 10% 10%, rgba(139,92,246,.15) 0%, transparent 65%),
-    radial-gradient(ellipse 55% 40% at 90% 90%, rgba(59,130,246,.1)  0%, transparent 65%),
-    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(236,72,153,.05) 0%, transparent 60%);
+    radial-gradient(circle at 15% 20%, rgba(212,240,58,.07) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(212,240,58,.04) 0%, transparent 45%);
+}
+/* Film grain */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.04;
 }
 
-.wrap{max-width:860px;margin:0 auto;padding:32px 20px;position:relative;z-index:1}
-
-/* ── header ── */
-header{
-  display:flex;align-items:center;gap:14px;
-  margin-bottom:32px;
-}
-.logo-icon{
-  width:46px;height:46px;border-radius:13px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:23px;
-  background:linear-gradient(135deg,var(--pud),var(--pu) 50%,var(--bl));
-  box-shadow:0 0 24px rgba(139,92,246,.35);
-}
-.logo-text h1{
-  font-size:20px;font-weight:700;letter-spacing:-.3px;
-  background:linear-gradient(90deg,var(--pul),var(--bl));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-}
-.logo-text p{font-size:11px;color:var(--muted);margin-top:2px}
-
-/* ── free chip ── */
-.free-bar{
-  display:flex;align-items:center;gap:10px;
-  background:var(--s1);border:1px solid rgba(16,185,129,.3);
-  border-radius:13px;padding:13px 18px;margin-bottom:28px;font-size:13px;
-  color:var(--muted);
-}
-.chip-green{
-  padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;
-  background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+  position: relative; z-index: 10;
 }
 
-/* ── input ── */
-.input-label{
-  display:block;font-size:11px;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--muted);margin-bottom:10px;
+/* ── HEADER ── */
+.eyebrow {
+  font-size: .55rem; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px;
 }
-.ibox{position:relative;margin-bottom:36px}
-textarea.idea{
-  width:100%;padding:18px 160px 18px 20px;
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:16px;color:var(--text);font-size:15px;
-  font-family:inherit;line-height:1.6;
-  resize:none;outline:none;min-height:64px;max-height:200px;
-  overflow-y:auto;transition:.2s;
-}
-textarea.idea::placeholder{color:var(--muted)}
-textarea.idea:focus{
-  border-color:var(--pu);
-  box-shadow:0 0 0 3px rgba(139,92,246,.15),0 0 24px rgba(139,92,246,.08);
-}
-.gen-btn{
-  position:absolute;right:11px;top:50%;transform:translateY(-50%);
-  padding:11px 26px;
-  background:linear-gradient(135deg,var(--pud),var(--pu));
-  border:none;border-radius:11px;color:#fff;
-  font-size:14px;font-weight:600;cursor:pointer;
-  display:flex;align-items:center;gap:8px;
-  transition:.18s;white-space:nowrap;
-}
-.gen-btn:hover:not(:disabled){
-  transform:translateY(-50%) scale(1.03);
-  box-shadow:0 4px 24px rgba(139,92,246,.5);
-}
-.gen-btn:active:not(:disabled){transform:translateY(-50%) scale(.97)}
-.gen-btn:disabled{opacity:.4;cursor:not-allowed;transform:translateY(-50%)}
-.spin{
-  width:14px;height:14px;
-  border:2px solid rgba(255,255,255,.25);border-top-color:#fff;
-  border-radius:50%;animation:spin .6s linear infinite;display:none;
-}
-.gen-btn.busy .spin{display:block}
-.gen-btn.busy .lbl{display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
+.eyebrow::before { content:''; width:28px; height:1px; background:var(--muted); }
+.eyebrow span { color: var(--accent); }
 
-/* ── card ── */
-.card{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:20px;overflow:hidden;
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  line-height: .88; letter-spacing: -.01em;
+  color: var(--text);
+  text-shadow: 0 0 60px rgba(212,240,58,.08);
+  margin-bottom: 18px;
 }
-.ch{
-  padding:14px 17px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:10px;
-}
-.badge-p{
-  padding:3px 11px;border-radius:20px;
-  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-  background:rgba(139,92,246,.18);color:var(--pul);border:1px solid rgba(139,92,246,.3)
-}
-.cmodel{font-size:12px;color:var(--muted);flex:1}
-.fc{
-  font-size:10px;color:var(--gr);
-  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);
-  padding:2px 7px;border-radius:20px;
-}
-.dl{
-  width:30px;height:30px;border-radius:8px;
-  background:var(--s2);border:1px solid var(--border);
-  color:var(--muted);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;text-decoration:none;transition:.18s;
-}
-.dl:hover{border-color:var(--pu);color:var(--text)}
+h1 em { color: var(--accent); font-style:normal; }
 
-/* card body */
-.cb{
-  aspect-ratio:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:14px;
-  padding:20px;text-align:center;
+.tagline {
+  font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 60px;
+  display: flex; align-items: center; gap: 14px;
 }
-.ph-ico{font-size:48px;opacity:.15}
-.ph-txt{font-size:14px;color:var(--muted);line-height:1.6;max-width:320px}
-.ring{
-  width:50px;height:50px;
-  border:3px solid var(--border);border-top-color:var(--pu);
-  border-radius:50%;animation:spin .8s linear infinite;
+.tagline::after { content:''; flex:1; max-width:200px; height:1px; background:var(--border); }
+
+/* ── PROMPT ── */
+.field-label {
+  font-size: .55rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 10px;
 }
-.lt{font-size:13px;color:var(--muted)}
-.err-ico{font-size:30px}
-.err-txt{font-size:12px;color:var(--re);max-width:300px;line-height:1.6}
-.retry-btn{
-  margin-top:8px;padding:7px 16px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;
+.prompt-wrap { position:relative; margin-bottom: 24px; }
+
+textarea {
+  width:100%; min-height:72px; max-height:200px;
+  padding: 20px 180px 20px 20px;
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 3px; color: var(--text);
+  font-family: 'Space Mono', monospace; font-size: 13px; line-height:1.65;
+  resize:none; outline:none; overflow-y:auto; transition: border-color .2s;
+}
+textarea::placeholder { color: var(--muted); }
+textarea:focus { border-color: rgba(212,240,58,.35); }
+
+.gen-btn {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  padding: 13px 28px;
+  background: var(--accent); border:none; border-radius:2px;
+  color: #060606; font-family: 'Bebas Neue', sans-serif;
+  font-size: 19px; letter-spacing:.06em;
+  cursor:pointer; display:flex; align-items:center; gap:8px;
+  transition:.15s; white-space:nowrap;
+}
+.gen-btn:hover:not(:disabled) { background:#e8ff52; transform:translateY(-50%) scale(1.02); }
+.gen-btn:active:not(:disabled) { transform:translateY(-50%) scale(.98); }
+.gen-btn:disabled { opacity:.35; cursor:not-allowed; transform:translateY(-50%); }
+.spin {
+  width:13px; height:13px;
+  border:2px solid rgba(6,6,6,.3); border-top-color:#060606;
+  border-radius:50%; animation:spin .6s linear infinite; display:none;
+}
+.gen-btn.busy .spin { display:block; }
+.gen-btn.busy .lbl { display:none; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── STYLE PILLS ── */
+.row-label {
+  font-size:.52rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--muted); display:block; margin-bottom:10px;
+}
+.pills { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+.pill {
+  padding:5px 13px; background:transparent;
+  border:1px solid var(--border); border-radius:2px;
+  color:var(--muted); font-family:'Space Mono',monospace;
+  font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  cursor:pointer; transition:.15s;
+}
+.pill:hover { border-color:rgba(212,240,58,.35); color:var(--text); }
+.pill.on { background:var(--accent); border-color:var(--accent); color:#060606; font-weight:700; }
+
+/* ── ASPECT RATIO ── */
+.ratios { display:flex; gap:7px; margin-bottom:44px; }
+.r-btn {
+  padding:5px 12px; background:transparent;
+  border:1px solid var(--border); border-radius:2px;
+  color:var(--muted); font-family:'Space Mono',monospace;
+  font-size:9px; letter-spacing:.14em; text-transform:uppercase;
+  cursor:pointer; transition:.15s;
+}
+.r-btn:hover { border-color:rgba(212,240,58,.3); color:var(--text); }
+.r-btn.on { border-color:var(--accent); color:var(--accent); }
+
+/* ── OUTPUT ── */
+.out-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+.out-actions { display:flex; gap:8px; }
+
+.icon-btn {
+  padding:6px 14px; background:transparent;
+  border:1px solid var(--border); border-radius:2px;
+  color:var(--muted); font-family:'Space Mono',monospace;
+  font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:5px;
   transition:.15s;
 }
-.retry-btn:hover{border-color:var(--pu);color:var(--text)}
-.card-img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.icon-btn:hover { border-color:var(--accent); color:var(--accent); }
 
-/* card footer */
-.cf{padding:11px 15px;border-top:1px solid var(--border)}
-.pt{
-  width:100%;background:none;border:none;
-  color:var(--muted);font-size:12px;cursor:pointer;
-  text-align:left;padding:0;display:flex;align-items:center;gap:6px;
-  transition:.15s;
+.canvas {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:3px; overflow:hidden;
 }
-.pt:hover{color:var(--text)}
-.ptxt{
-  display:none;margin-top:9px;font-size:11.5px;
-  color:var(--muted);line-height:1.6;
-  background:var(--s2);padding:10px 13px;
-  border-radius:8px;border:1px solid var(--border);
-  word-break:break-word;
-}
-.ptxt.on{display:block}
 
-/* ── toast ── */
-.toast{
-  position:fixed;bottom:22px;right:22px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:10px;padding:12px 18px;
-  font-size:13px;z-index:200;
-  transform:translateY(70px);opacity:0;transition:.28s;pointer-events:none;
+/* placeholder */
+.ph {
+  aspect-ratio:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:16px; padding:48px; text-align:center;
 }
-.toast.on{transform:none;opacity:1}
-.toast.ok{border-color:var(--gr)}.toast.er{border-color:var(--re)}
+.ph-mark { font-size:52px; opacity:.06; }
+.ph-copy {
+  font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); line-height:2;
+}
+
+/* loading */
+.ld {
+  aspect-ratio:1; display:none; flex-direction:column;
+  align-items:center; justify-content:center; gap:28px;
+}
+.prog-wrap { position:relative; width:72px; height:72px; }
+svg.prog { transform:rotate(-90deg); }
+circle.trk { stroke:var(--border); }
+circle.fill {
+  stroke:var(--accent);
+  stroke-dasharray: 163;
+  stroke-dashoffset: 163;
+  transition: stroke-dashoffset .5s ease;
+}
+.pct {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:17px; color:var(--accent);
+}
+.ld-msg {
+  font-size:.58rem; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--muted); text-align:center; max-width:280px; line-height:1.8;
+}
+
+/* error */
+.er {
+  aspect-ratio:1; display:none; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:18px; padding:40px; text-align:center;
+}
+.er-txt {
+  font-size:.62rem; letter-spacing:.06em; color:#f87171;
+  line-height:1.8; max-width:340px;
+}
+.retry {
+  padding:8px 20px; background:transparent;
+  border:1px solid #f87171; border-radius:2px;
+  color:#f87171; font-family:'Space Mono',monospace;
+  font-size:.58rem; letter-spacing:.12em; text-transform:uppercase;
+  cursor:pointer; transition:.15s;
+}
+.retry:hover { background:rgba(248,113,113,.08); }
+
+/* result image */
+.out-img { width:100%; display:none; }
+
+/* prompt reveal */
+.pr { margin-top:12px; display:none; }
+.pr-toggle {
+  background:none; border:none; color:var(--muted);
+  font-family:'Space Mono',monospace; font-size:.58rem;
+  letter-spacing:.1em; text-transform:uppercase;
+  cursor:pointer; display:flex; align-items:center; gap:7px;
+  padding:0; transition:color .15s;
+}
+.pr-toggle:hover { color:var(--text); }
+.pr-body {
+  display:none; margin-top:9px; padding:12px 15px;
+  background:var(--s1); border:1px solid var(--border); border-radius:3px;
+  font-size:.6rem; color:var(--muted); line-height:1.75; word-break:break-word;
+}
+.pr-body.on { display:block; }
+
+/* ── DIVIDER ── */
+.div { border:none; border-top:1px solid var(--border); margin:52px 0; }
+
+/* ── HISTORY ── */
+.hist-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px;
+}
+.clr-btn {
+  background:none; border:none; color:var(--muted);
+  font-family:'Space Mono',monospace; font-size:.55rem;
+  letter-spacing:.1em; text-transform:uppercase;
+  cursor:pointer; transition:color .15s;
+}
+.clr-btn:hover { color:#f87171; }
+.hist-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;
+}
+.hi {
+  aspect-ratio:1; overflow:hidden; border-radius:3px; cursor:pointer;
+  border:1px solid var(--border); position:relative;
+}
+.hi img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s; }
+.hi:hover img { transform:scale(1.06); }
+.hi-ov {
+  position:absolute; inset:0; background:rgba(6,6,6,.6);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .2s;
+}
+.hi:hover .hi-ov { opacity:1; }
+.hi-ov span {
+  font-size:.52rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent);
+}
+
+/* ── FOOTER ── */
+footer {
+  margin-top:72px; padding-top:24px; border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.ft-brand {
+  font-family:'Bebas Neue',sans-serif; font-size:20px;
+  color:var(--muted); letter-spacing:.04em;
+}
+.ft-note {
+  font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:24px; right:24px;
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:2px; padding:12px 18px;
+  font-family:'Space Mono',monospace; font-size:.62rem; letter-spacing:.05em;
+  z-index:200; transform:translateY(60px); opacity:0; transition:.25s; pointer-events:none;
+}
+.toast.on { transform:none; opacity:1; }
+.toast.ok { border-color:var(--accent); color:var(--accent); }
+.toast.er { border-color:#f87171; color:#f87171; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px) {
+  h1 { font-size:3.2rem; }
+  .gen-btn { padding:10px 16px; font-size:16px; right:8px; }
+  textarea { padding-right:110px; }
+  .hist-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <!-- Header -->
-  <header>
-    <div class="logo-icon">🎨</div>
-    <div class="logo-text">
-      <h1>IRREALLAB STUDIO</h1>
-      <p>AI Image Generation · Powered by Pollinations FLUX</p>
-    </div>
-  </header>
+  <div class="eyebrow"><span>personal workspace</span> · AI image generation</div>
+  <h1>IRREALLAB<br><em>STUDIO</em></h1>
+  <p class="tagline">Powered by Pollinations &amp; Stable Horde · 100% free · No account needed</p>
 
-  <!-- Free bar -->
-  <div class="free-bar">
-    <span class="chip-green">100% Free</span>
-    <span>No account or API key needed — generate unlimited images instantly.</span>
-  </div>
-
-  <!-- Input -->
-  <label class="input-label" for="idea">Your image idea</label>
-  <div class="ibox">
-    <textarea class="idea" id="idea" rows="1"
-      placeholder="A girl walking on the moon, realistic…"
-      onkeydown="onKey(event)"
-      oninput="grow(this)"></textarea>
+  <!-- Prompt -->
+  <label class="field-label" for="idea">Describe your image</label>
+  <div class="prompt-wrap">
+    <textarea id="idea" rows="2"
+      placeholder="A surreal cityscape at golden hour, fog rolling through glass towers…"
+      onkeydown="onKey(event)" oninput="grow(this)"></textarea>
     <button class="gen-btn" id="genBtn" onclick="generate()">
       <div class="spin"></div>
-      <span class="lbl">✦ Generate</span>
+      <span class="lbl">GENERATE</span>
     </button>
   </div>
 
-  <!-- Card -->
-  <div class="card">
-    <div class="ch">
-      <span class="badge-p">Pollinations</span>
-      <span class="cmodel">FLUX · by Pollinations.ai</span>
-      <span class="fc">FREE</span>
-      <a class="dl" id="pdl" style="display:none" title="Download image">↓</a>
-    </div>
-    <div class="cb" id="pph">
-      <div class="ph-ico">🖼</div>
-      <div class="ph-txt">Type your image idea above and hit Generate — no sign-up required.</div>
-    </div>
-    <div class="cb" id="pld" style="display:none">
-      <div class="ring"></div>
-      <div class="lt">Generating your image…</div>
-    </div>
-    <div class="cb" id="perr" style="display:none">
-      <div class="err-ico">⚠️</div>
-      <div class="err-txt" id="perrtxt"></div>
-      <button class="retry-btn" onclick="retry()">↺ Try again</button>
-    </div>
-    <img class="card-img" id="pimg" style="display:none" alt="Generated image">
-    <div class="cf" id="pcf" style="display:none">
-      <button class="pt" onclick="tog()">
-        <span id="parr">▶</span> View crafted prompt
-      </button>
-      <div class="ptxt" id="pptxt"></div>
+  <!-- Style presets -->
+  <span class="row-label">Style</span>
+  <div class="pills">
+    <button class="pill on" data-s="cinematic"  onclick="setStyle(this)">Cinematic</button>
+    <button class="pill"    data-s="realistic"  onclick="setStyle(this)">Realistic</button>
+    <button class="pill"    data-s="portrait"   onclick="setStyle(this)">Portrait</button>
+    <button class="pill"    data-s="anime"      onclick="setStyle(this)">Anime</button>
+    <button class="pill"    data-s="cyberpunk"  onclick="setStyle(this)">Cyberpunk</button>
+    <button class="pill"    data-s="fantasy"    onclick="setStyle(this)">Fantasy</button>
+    <button class="pill"    data-s="abstract"   onclick="setStyle(this)">Abstract</button>
+    <button class="pill"    data-s="vintage"    onclick="setStyle(this)">Vintage</button>
+    <button class="pill"    data-s="minimal"    onclick="setStyle(this)">Minimal</button>
+    <button class="pill"    data-s="horror"     onclick="setStyle(this)">Dark / Horror</button>
+    <button class="pill"    data-s="surreal"    onclick="setStyle(this)">Surreal</button>
+    <button class="pill"    data-s="3d"         onclick="setStyle(this)">3D Render</button>
+  </div>
+
+  <!-- Aspect ratio -->
+  <span class="row-label">Format</span>
+  <div class="ratios">
+    <button class="r-btn on" data-w="1024" data-h="1024" onclick="setRatio(this)">1:1 Square</button>
+    <button class="r-btn"    data-w="1024" data-h="576"  onclick="setRatio(this)">16:9 Wide</button>
+    <button class="r-btn"    data-w="576"  data-h="1024" onclick="setRatio(this)">9:16 Tall</button>
+    <button class="r-btn"    data-w="1024" data-h="768"  onclick="setRatio(this)">4:3</button>
+  </div>
+
+  <!-- Output -->
+  <div class="out-header">
+    <span class="field-label" style="margin:0">Output</span>
+    <div class="out-actions">
+      <a  class="icon-btn" id="dlBtn"    style="display:none" download="irreallab.png">↓ Save</a>
+      <button class="icon-btn" id="regenBtn" style="display:none" onclick="generate()">↺ New variation</button>
     </div>
   </div>
+
+  <div class="canvas">
+    <!-- Placeholder -->
+    <div class="ph" id="phState">
+      <div class="ph-mark">✦</div>
+      <div class="ph-copy">Your image will<br>appear here</div>
+    </div>
+    <!-- Loading -->
+    <div class="ld" id="ldState">
+      <div class="prog-wrap">
+        <svg class="prog" width="72" height="72">
+          <circle class="trk"  cx="36" cy="36" r="26" stroke-width="3" fill="none"/>
+          <circle class="fill" id="fillCircle" cx="36" cy="36" r="26" stroke-width="3" fill="none"/>
+        </svg>
+        <div class="pct" id="pctTxt">0%</div>
+      </div>
+      <div class="ld-msg" id="ldMsg">Initialising…</div>
+    </div>
+    <!-- Error -->
+    <div class="er" id="erState">
+      <div class="er-txt" id="erTxt"></div>
+      <button class="retry" onclick="generate()">↺ Try again</button>
+    </div>
+    <!-- Image -->
+    <img class="out-img" id="outImg" alt="Generated image">
+  </div>
+
+  <!-- Prompt reveal -->
+  <div class="pr" id="prWrap">
+    <button class="pr-toggle" onclick="togglePR()">
+      <span id="prArr">▶</span> View crafted prompt
+    </button>
+    <div class="pr-body" id="prBody"></div>
+  </div>
+
+  <hr class="div">
+
+  <!-- History -->
+  <div id="histWrap" style="display:none">
+    <div class="hist-header">
+      <span class="field-label" style="margin:0">Recent generations</span>
+      <button class="clr-btn" onclick="clearHistory()">Clear all</button>
+    </div>
+    <div class="hist-grid" id="histGrid"></div>
+    <hr class="div">
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="ft-brand">IRREALLAB</div>
+    <div class="ft-note">Personal workspace · Local only</div>
+  </footer>
 
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── Prompt engineering ───────────────────────────────────────────────────────
+// ─── Config ───────────────────────────────────────────────────────────────────
+let activeStyle = 'cinematic'
+let imgW = 1024, imgH = 1024
+let lastPrompt = ''
+let history = []
 
-const STYLE_MAP = {
-  realistic:     "photorealistic, cinematic, shot on Sony A7R V, 8K",
-  photo:         "documentary photography, professional camera, natural light",
-  cartoon:       "vibrant cartoon illustration, bold outlines, digital art",
-  anime:         "anime style, detailed, vibrant, Studio Ghibli inspired",
-  watercolor:    "watercolor painting, soft flowing brushstrokes, artistic",
-  "oil painting":"oil painting, thick brushwork, classical technique",
-  "3d":          "3D render, Octane render, volumetric lighting, 8K",
-  cyberpunk:     "cyberpunk aesthetic, neon lights, rain-soaked streets",
-  fantasy:       "epic fantasy art, magical atmosphere, cinematic, intricate detail",
-  portrait:      "studio portrait photography, Rembrandt lighting, bokeh",
-  landscape:     "landscape photography, ultra-wide angle, golden hour",
-  abstract:      "abstract digital art, vivid colours, geometric tension",
-  vintage:       "vintage film photograph, Kodak grain, warm tones, 1970s",
-  minimalist:    "minimalist composition, negative space, clean lines",
-  sketch:        "detailed pencil sketch, fine hatching, technical illustration",
+const STYLES = {
+  cinematic: 'cinematic photography, anamorphic lens flare, dramatic lighting, film grain, color graded, 4K DCI',
+  realistic: 'photorealistic, hyperrealistic, shot on Sony A7R V, professional photography, 8K, sharp detail',
+  portrait:  'studio portrait photography, Rembrandt lighting, 85mm f/1.4 bokeh, ultra-sharp eyes, professional',
+  anime:     'anime key visual, Studio Ghibli color palette, detailed illustration, vibrant, cinematic composition',
+  cyberpunk: 'cyberpunk noir, neon-lit rain-soaked streets, holographic billboards, Blade Runner atmosphere',
+  fantasy:   'epic fantasy concept art, magical golden particles, dramatic sky, cinematic, highly detailed',
+  abstract:  'abstract expressionism, generative art, vivid chromatic palette, geometric tension, surreal',
+  vintage:   'vintage film photograph, expired Kodak Ektar, warm analog grain, faded tones, 1970s',
+  minimal:   'minimalist composition, negative space, monochromatic palette, clean lines, Bauhaus-inspired',
+  horror:    'dark atmospheric horror, deep shadows, eerie fog, unsettling silence, cinematic dread',
+  surreal:   'surrealist dreamscape, impossible architecture, Dalí-inspired, hyper-detailed, mind-bending',
+  '3d':      '3D CGI render, Octane Render, volumetric light, subsurface scattering, ultra-realistic material',
 }
 
-const NIGHT = new Set(["night","dark","moon","stars","star","lunar","midnight","space","galaxy","twilight"])
-const WARM  = new Set(["sunset","sunrise","dawn","dusk","golden"])
+const NIGHT_W = new Set(['night','dark','moon','stars','lunar','midnight','space','galaxy','twilight','shadow'])
+const WARM_W  = new Set(['sunset','sunrise','dawn','dusk','golden','warm','fire','sun'])
 
-function craftPrompt(idea){
-  const low = idea.toLowerCase()
-  let style = "photorealistic, cinematic, 8K, professional photography"
-  for(const [kw, s] of Object.entries(STYLE_MAP)){
-    if(low.includes(kw)){ style = s; break }
+function buildPrompt(idea) {
+  const low = idea.toLowerCase().split(/\W+/)
+  let light = 'soft diffused natural light, perfect exposure, professional colour grade'
+  if(low.some(x => NIGHT_W.has(x))) light = 'moonlight, deep indigo atmosphere, ethereal glow, long shadows'
+  else if(low.some(x => WARM_W.has(x))) light = 'golden hour warm backlight, god rays, long cinematic shadows'
+  const s = STYLES[activeStyle] || STYLES.cinematic
+  return `${idea}, ${s}, ${light}, masterpiece, award-winning, highly detailed`
+}
+
+// ─── Generation ───────────────────────────────────────────────────────────────
+async function generate() {
+  const idea = document.getElementById('idea').value.trim()
+  if(!idea) { toast('Enter your image idea first', 'er'); return }
+
+  const btn = document.getElementById('genBtn')
+  btn.disabled = true; btn.classList.add('busy')
+
+  // Reset UI
+  setState('ld')
+  hide('dlBtn'); hide('regenBtn'); hide('prWrap')
+  setProgress(0, 'Building your prompt…')
+
+  const prompt = buildPrompt(idea)
+  lastPrompt = prompt
+
+  try {
+    const src = await tryAll(prompt)
+    const img = document.getElementById('outImg')
+    img.src = src
+    img.style.display = 'block'
+    setState('img')
+
+    document.getElementById('dlBtn').href = src
+    document.getElementById('dlBtn').download = `irreallab-${Date.now()}.png`
+    show('dlBtn', 'inline-flex')
+    show('regenBtn', 'inline-flex')
+    show('prWrap', 'block')
+    document.getElementById('prBody').textContent = prompt
+    addHistory(src, idea)
+  } catch(e) {
+    setState('er')
+    document.getElementById('erTxt').textContent = e.message
   }
-  const words = low.split(/\W+/)
-  let lighting = "soft natural lighting, perfect exposure, sharp focus"
-  if(words.some(x => NIGHT.has(x))) lighting = "moonlight, deep blue night sky, ethereal glow"
-  else if(words.some(x => WARM.has(x))) lighting = "golden hour warm light, long dramatic shadows"
-  return `${idea}, ${style}, ${lighting}, intricate detail, rule of thirds, award-winning`
+
+  btn.disabled = false; btn.classList.remove('busy')
 }
 
-// ─── Image generation ─────────────────────────────────────────────────────────
+// Try multiple generators
+async function tryAll(prompt) {
+  const seed = Math.floor(Math.random() * 999999)
+  const enc  = encodeURIComponent(prompt)
 
-let lastPrompt = ""
-
-async function genPollinations(prompt){
-  const seed = Math.floor(Math.random()*999999)
-  const encoded = encodeURIComponent(prompt)
-  const urls = [
-    `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&seed=${seed}`,
-    `https://image.pollinations.ai/prompt/${encoded}?model=turbo&width=1024&height=1024&seed=${seed}`,
-    `https://image.pollinations.ai/prompt/${encoded}?seed=${seed}`,
+  // — Pollinations attempts —
+  const pUrls = [
+    `https://image.pollinations.ai/prompt/${enc}?width=${imgW}&height=${imgH}&seed=${seed}`,
+    `https://image.pollinations.ai/prompt/${enc}?seed=${seed}`,
+    `https://image.pollinations.ai/prompt/${enc}`,
   ]
-  let lastStatus = 0
-  for(const url of urls){
-    const r = await fetch(url)
-    if(r.ok){
-      const blob = await r.blob()
-      if(blob.type.startsWith('image/')) return URL.createObjectURL(blob)
-    }
-    lastStatus = r.status
+
+  for(let i = 0; i < pUrls.length; i++) {
+    setProgress(10 + i * 12, `Generating via Pollinations${i > 0 ? ` (try ${i+1})` : ''}…`)
+    try {
+      const r = await fetchWithTimeout(pUrls[i], 30000)
+      if(r.ok) {
+        const blob = await r.blob()
+        if(blob.size > 5000 && blob.type.startsWith('image/')) {
+          setProgress(95, 'Finalising…')
+          return URL.createObjectURL(blob)
+        }
+      }
+    } catch(_) { /* next */ }
   }
-  throw new Error(`Pollinations unavailable (${lastStatus}) — please try again shortly.`)
+
+  // — Stable Horde fallback —
+  setProgress(40, 'Switching to Stable Horde (community GPU)…')
+  return await stableHorde(prompt)
 }
 
-// ─── UI ───────────────────────────────────────────────────────────────────────
+function fetchWithTimeout(url, ms) {
+  const ctrl = new AbortController()
+  const id = setTimeout(() => ctrl.abort(), ms)
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(id))
+}
 
-function show(id, flex){ document.getElementById(id).style.display = flex ? 'flex' : 'block' }
-function hide(id){ document.getElementById(id).style.display = 'none' }
-function setText(id, t){ document.getElementById(id).textContent = t }
+// Stable Horde — free, anonymous, SDXL-quality
+async function stableHorde(prompt) {
+  setProgress(45, 'Submitting to Stable Horde queue…')
 
-function toast(msg, type=''){
+  const body = {
+    prompt,
+    params: {
+      sampler_name: 'k_euler_a',
+      cfg_scale: 7.5,
+      width:  imgW <= 768 ? imgW : 1024,
+      height: imgH <= 768 ? imgH : 1024,
+      steps: 28,
+      n: 1,
+      karras: true,
+    },
+    models: ['AlbedoBase XL (SDXL)'],
+    r2: true,
+    shared: false,
+    nsfw: false,
+  }
+
+  const res = await fetch('https://stablehorde.net/api/v2/generate/async', {
+    method: 'POST',
+    headers: { 'apikey': '0000000000', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+  if(!res.ok) {
+    const t = await res.text()
+    throw new Error(`Stable Horde error ${res.status} — please try again.`)
+  }
+
+  const { id } = await res.json()
+  if(!id) throw new Error('No job ID returned — please try again.')
+
+  setProgress(50, 'Job queued — waiting for a GPU worker…')
+
+  // Poll until done (up to 5 min)
+  for(let i = 0; i < 100; i++) {
+    await sleep(3000)
+    const chk = await fetch(`https://stablehorde.net/api/v2/generate/check/${id}`)
+    if(!chk.ok) continue
+    const st = await chk.json()
+
+    const pct = Math.min(90, 52 + i * 0.4)
+    const wt  = st.wait_time > 0 ? `~${st.wait_time}s left` : 'almost done…'
+    setProgress(Math.round(pct), st.done ? 'Processing final image…' : `GPU working — ${wt}`)
+
+    if(st.done) break
+    if(st.faulted) throw new Error('Generation faulted on worker — try again.')
+  }
+
+  setProgress(93, 'Downloading your image…')
+  const final = await fetch(`https://stablehorde.net/api/v2/generate/status/${id}`)
+  const data  = await final.json()
+
+  if(!data.generations?.length) throw new Error('No image returned. The queue may be busy — try again in a moment.')
+
+  const imgUrl = data.generations[0].img
+  const imgRes = await fetch(imgUrl)
+  const blob   = await imgRes.blob()
+  return URL.createObjectURL(blob)
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+// ─── Progress ring ────────────────────────────────────────────────────────────
+const C = 2 * Math.PI * 26  // circumference
+document.getElementById('fillCircle').style.strokeDasharray  = C
+document.getElementById('fillCircle').style.strokeDashoffset = C
+
+function setProgress(pct, msg) {
+  const offset = C - (pct / 100) * C
+  document.getElementById('fillCircle').style.strokeDashoffset = offset
+  document.getElementById('pctTxt').textContent = pct + '%'
+  if(msg) document.getElementById('ldMsg').textContent = msg
+}
+
+// ─── UI state ─────────────────────────────────────────────────────────────────
+function setState(s) {
+  const ids = ['phState','ldState','erState']
+  ids.forEach(id => document.getElementById(id).style.display = 'none')
+  document.getElementById('outImg').style.display = 'none'
+  if(s === 'ph') document.getElementById('phState').style.display = 'flex'
+  if(s === 'ld') document.getElementById('ldState').style.display = 'flex'
+  if(s === 'er') document.getElementById('erState').style.display = 'flex'
+  if(s === 'img') { /* img shown separately */ }
+}
+
+function show(id, d='block') { document.getElementById(id).style.display = d }
+function hide(id) { document.getElementById(id).style.display = 'none' }
+
+function toast(msg, type='') {
   const el = document.getElementById('toast')
   el.textContent = msg
   el.className = 'toast on' + (type ? ' '+type : '')
@@ -327,69 +625,59 @@ function toast(msg, type=''){
   el._t = setTimeout(() => el.className = 'toast', 3200)
 }
 
-function grow(el){
+function grow(el) {
   el.style.height = 'auto'
   el.style.height = Math.min(el.scrollHeight, 200) + 'px'
 }
-
-function onKey(e){
-  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); generate() }
+function onKey(e) {
+  if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate() }
+}
+function togglePR() {
+  const b = document.getElementById('prBody')
+  const a = document.getElementById('prArr')
+  b.classList.toggle('on')
+  a.textContent = b.classList.contains('on') ? '▼' : '▶'
 }
 
-function tog(){
-  const t = document.getElementById('pptxt')
-  const a = document.getElementById('parr')
-  t.classList.toggle('on')
-  a.textContent = t.classList.contains('on') ? '▼' : '▶'
+// ─── Style & ratio ────────────────────────────────────────────────────────────
+function setStyle(el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'))
+  el.classList.add('on')
+  activeStyle = el.dataset.s
+}
+function setRatio(el) {
+  document.querySelectorAll('.r-btn').forEach(b => b.classList.remove('on'))
+  el.classList.add('on')
+  imgW = parseInt(el.dataset.w)
+  imgH = parseInt(el.dataset.h)
 }
 
-function setState(state){
-  for(const s of ['pph','pld','perr','pimg','pcf']){
-    document.getElementById(s).style.display = 'none'
-  }
-  hide('pdl')
-  if(state === 'ph')  show('pph', true)
-  if(state === 'ld')  show('pld', true)
-  if(state === 'err') show('perr', true)
-  if(state === 'img'){ show('pimg'); show('pcf') }
+// ─── History ──────────────────────────────────────────────────────────────────
+function addHistory(src, idea) {
+  history.unshift({ src, idea })
+  if(history.length > 16) history.pop()
+  renderHistory()
 }
-
-async function generate(){
-  const idea = document.getElementById('idea').value.trim()
-  if(!idea){ toast('Enter an image idea first', 'er'); return }
-
-  const btn = document.getElementById('genBtn')
-  btn.disabled = true
-  btn.classList.add('busy')
-  setState('ld')
-
-  const prompt = craftPrompt(idea)
-  lastPrompt = prompt
-
-  try {
-    const src = await genPollinations(prompt)
-    const img = document.getElementById('pimg')
-    img.src = src
-    setState('img')
-    setText('pptxt', prompt)
-    const dl = document.getElementById('pdl')
-    dl.href = src
-    dl.download = `irreallab-${Date.now()}.png`
-    show('pdl', true)
-  } catch(e) {
-    setState('err')
-    setText('perrtxt', e.message)
-  }
-
-  btn.disabled = false
-  btn.classList.remove('busy')
+function renderHistory() {
+  if(!history.length) { hide('histWrap'); return }
+  show('histWrap')
+  document.getElementById('histGrid').innerHTML = history.map((item, i) => `
+    <div class="hi" onclick="loadHist(${i})" title="${item.idea}">
+      <img src="${item.src}" alt="" loading="lazy">
+      <div class="hi-ov"><span>↑ Load</span></div>
+    </div>
+  `).join('')
 }
-
-function retry(){
-  if(lastPrompt){
-    document.getElementById('idea').dispatchEvent(new Event('input'))
-    generate()
-  }
+function loadHist(i) {
+  const el = document.getElementById('idea')
+  el.value = history[i].idea
+  grow(el)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+function clearHistory() {
+  history = []
+  renderHistory()
+  toast('History cleared', 'ok')
 }
 </script>
 </body>
