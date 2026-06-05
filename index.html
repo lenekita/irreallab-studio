@@ -126,7 +126,7 @@ textarea.idea:focus{
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── grid ── */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
 @media(max-width:680px){.grid{grid-template-columns:1fr}}
 
 /* ── card ── */
@@ -283,7 +283,7 @@ textarea.idea:focus{
       <div class="logo-icon">🎨</div>
       <div class="logo-text">
         <h1>IRREALLAB STUDIO</h1>
-        <p>Pollinations FLUX &amp; Gemini Flash Image</p>
+        <p>FLUX, Gemini &amp; DALL-E Image Generation</p>
       </div>
     </div>
     <button class="gear-btn" onclick="openSettings()" title="Settings">⚙</button>
@@ -378,6 +378,35 @@ textarea.idea:focus{
       </div>
     </div>
 
+    <!-- DALL-E card -->
+    <div class="card">
+      <div class="ch">
+        <span class="badge badge-p">DALL-E</span>
+        <span class="cmodel">3 · by OpenAI</span>
+        <span class="fc">PAID</span>
+        <a class="dl" id="ddl" style="display:none" title="Download">↓</a>
+      </div>
+      <div class="cb" id="dph">
+        <div class="ph-ico">🖼</div>
+        <div class="ph-txt" id="dphTxt">Add your OpenAI key in ⚙ Settings to enable</div>
+      </div>
+      <div class="cb" id="dld" style="display:none">
+        <div class="ring"></div>
+        <div class="lt">Generating with DALL-E…</div>
+      </div>
+      <div class="cb" id="derr" style="display:none">
+        <div class="err-ico">⚠️</div>
+        <div class="err-txt" id="derrtxt"></div>
+      </div>
+      <img class="card-img" id="dimg" style="display:none" alt="DALL-E result">
+      <div class="cf" id="dcf" style="display:none">
+        <button class="pt" onclick="tog('d')">
+          <span id="darr">▶</span> View crafted prompt
+        </button>
+        <div class="ptxt" id="dptxt"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -407,10 +436,19 @@ textarea.idea:focus{
       <div class="svc-st" id="gSt">Needs key</div>
     </div>
 
+    <div class="svc">
+      <div class="svc-ico">🎨</div>
+      <div class="svc-info">
+        <div class="svc-name">DALL-E 3</div>
+        <div class="svc-sub">Paid API key required — $0.04-0.10 per image.</div>
+      </div>
+      <div class="svc-st" id="dSt">Needs key</div>
+    </div>
+
     <div class="field">
       <label><span class="dot" id="gdot"></span> Gemini API Key</label>
       <input type="password" id="gkey" placeholder="AIza…" autocomplete="off"
-             onkeydown="if(event.key==='Enter')saveKey()">
+             onkeydown="if(event.key==='Enter')saveKeys()">
       <div class="hint">
         Free at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a>
         — sign in with Google → Create API key. Done in 30 seconds.
@@ -419,7 +457,19 @@ textarea.idea:focus{
       </div>
     </div>
 
-    <button class="savebtn" onclick="saveKey()">Save Key</button>
+    <div class="field">
+      <label><span class="dot" id="ddot"></span> OpenAI API Key</label>
+      <input type="password" id="dkey" placeholder="sk-…" autocomplete="off"
+             onkeydown="if(event.key==='Enter')saveKeys()">
+      <div class="hint">
+        Get one at <a href="https://platform.openai.com/account/api-keys" target="_blank">platform.openai.com/account/api-keys</a>
+        — requires paid OpenAI account. DALL-E 3 costs credits.
+        <br><br>
+        🔒 Your key is saved only in this browser (localStorage). It never leaves your device.
+      </div>
+    </div>
+
+    <button class="savebtn" onclick="saveKeys()">Save Keys</button>
   </div>
 </div>
 
@@ -547,6 +597,41 @@ async function genGemini(prompt, apiKey){
   }
 }
 
+async function genDallE(prompt, apiKey){
+  try{
+    const r = await fetch("https://api.openai.com/v1/images/generations", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model:"dall-e-3",
+        prompt: prompt,
+        n:1,
+        size:"1024x1024",
+        quality:"standard"
+      })
+    })
+    if(!r.ok){
+      const err = await r.json()
+      const msg = err?.error?.message || "Unknown error"
+      if(msg.includes("api_key") || msg.includes("invalid_api_key"))
+        throw new Error("Invalid OpenAI key. Go to ⚙ Settings and paste your API key starting with sk-")
+      throw new Error("DALL-E: " + msg)
+    }
+    const data = await r.json()
+    const imageUrl = data.data[0].url
+    const response = await fetch(imageUrl)
+    const blob = await response.blob()
+    return URL.createObjectURL(blob)
+  }catch(e){
+    if(e.message.startsWith("DALL-E:") || e.message.startsWith("Invalid"))
+      throw e
+    throw new Error("DALL-E failed — check your API key in ⚙ Settings")
+  }
+}
+
 function b64toBlob(b64, type){
   const bin = atob(b64)
   const arr = new Uint8Array(bin.length)
@@ -597,15 +682,24 @@ function cardState(p, state){
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
 
-function getKey(){ return localStorage.getItem('GEMINI_KEY')||'' }
+function getGeminiKey(){ return localStorage.getItem('GEMINI_KEY')||'' }
+function getOpenAIKey(){ return localStorage.getItem('OPENAI_KEY')||'' }
 
 function refreshKeyStatus(){
-  const has = !!getKey()
-  document.getElementById('gdot').className   = 'dot '+(has?'ok':'no')
-  document.getElementById('gSt').textContent  = has ? '✓ Ready' : 'Needs key'
-  document.getElementById('gSt').className    = 'svc-st '+(has?'ok':'need')
-  document.getElementById('keyBanner').classList.toggle('off', has)
-  if(has) setText('gphTxt','Gemini image will appear here')
+  const ghas = !!getGeminiKey()
+  const dhas = !!getOpenAIKey()
+
+  document.getElementById('gdot').className   = 'dot '+(ghas?'ok':'no')
+  document.getElementById('gSt').textContent  = ghas ? '✓ Ready' : 'Needs key'
+  document.getElementById('gSt').className    = 'svc-st '+(ghas?'ok':'need')
+
+  document.getElementById('ddot').className   = 'dot '+(dhas?'ok':'no')
+  document.getElementById('dSt').textContent  = dhas ? '✓ Ready' : 'Needs key'
+  document.getElementById('dSt').className    = 'svc-st '+(dhas?'ok':'need')
+
+  document.getElementById('keyBanner').classList.toggle('off', ghas)
+  if(ghas) setText('gphTxt','Gemini image will appear here')
+  if(dhas) setText('dphTxt','DALL-E image will appear here')
 }
 
 function openSettings(){
@@ -618,13 +712,18 @@ function closeSettings(){
 function bgClose(e){
   if(e.target===document.getElementById('modal')) closeSettings()
 }
-function saveKey(){
-  const k = document.getElementById('gkey').value.trim()
-  if(!k){ toast('Paste your Gemini API key first','er'); return }
+function saveKeys(){
+  const g = document.getElementById('gkey').value.trim()
+  const d = document.getElementById('dkey').value.trim()
 
-  localStorage.setItem('GEMINI_KEY', k)
+  if(!g && !d){ toast('Paste at least one API key','er'); return }
+
+  if(g) localStorage.setItem('GEMINI_KEY', g)
+  if(d) localStorage.setItem('OPENAI_KEY', d)
+
   document.getElementById('gkey').value = ''
-  toast('Gemini key saved! ✓','ok')
+  document.getElementById('dkey').value = ''
+  toast('Keys saved! ✓','ok')
   closeSettings()
 }
 
@@ -640,12 +739,14 @@ async function generate(){
 
   cardState('p','ld')
   cardState('g','ld')
-  hide('pdl'); hide('gdl')
+  cardState('d','ld')
+  hide('pdl'); hide('gdl'); hide('ddl')
 
   const prompts = craftPrompts(idea)
-  const geminiKey = getKey()
+  const geminiKey = getGeminiKey()
+  const openaiKey = getOpenAIKey()
 
-  // Run both in parallel
+  // Run all three in parallel
   const tasks = [
     genPollinations(prompts.flux)
       .then(src => showResult('p', src, prompts.flux, 'pollinations'))
@@ -656,6 +757,12 @@ async function generate(){
           .then(src => showResult('g', src, prompts.gemini, 'gemini'))
           .catch(err => showError('g', err.message))
       : Promise.resolve(cardState('g','ph')),
+
+    openaiKey
+      ? genDallE(prompts.flux, openaiKey)
+          .then(src => showResult('d', src, prompts.flux, 'dalle'))
+          .catch(err => showError('d', err.message))
+      : Promise.resolve(cardState('d','ph')),
   ]
 
   await Promise.allSettled(tasks)
