@@ -294,12 +294,23 @@ function craftPrompt(idea){
 let lastPrompt = ""
 
 async function genPollinations(prompt){
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=1024&height=1024&seed=${Math.floor(Math.random()*999999)}`
-  const r = await fetch(url)
-  if(!r.ok) throw new Error(`Service returned ${r.status} — please try again in a moment.`)
-  const blob = await r.blob()
-  if(!blob.type.startsWith('image/')) throw new Error('Unexpected response — please try again.')
-  return URL.createObjectURL(blob)
+  const seed = Math.floor(Math.random()*999999)
+  const encoded = encodeURIComponent(prompt)
+  const urls = [
+    `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&seed=${seed}`,
+    `https://image.pollinations.ai/prompt/${encoded}?model=turbo&width=1024&height=1024&seed=${seed}`,
+    `https://image.pollinations.ai/prompt/${encoded}?seed=${seed}`,
+  ]
+  let lastStatus = 0
+  for(const url of urls){
+    const r = await fetch(url)
+    if(r.ok){
+      const blob = await r.blob()
+      if(blob.type.startsWith('image/')) return URL.createObjectURL(blob)
+    }
+    lastStatus = r.status
+  }
+  throw new Error(`Pollinations unavailable (${lastStatus}) — please try again shortly.`)
 }
 
 // ─── UI ───────────────────────────────────────────────────────────────────────
