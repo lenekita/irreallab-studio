@@ -461,11 +461,25 @@ function pollinationsDirect(prompt, seed, slotId) {
   return new Promise((resolve, reject) => {
     setCardMsg(slotId, 'Trying Pollinations FLUX…')
     const img = new Image()
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${imgW}&height=${imgH}&seed=${seed}`
-    const tid = setTimeout(() => { img.src = ''; reject(new Error('timeout')) }, 35000)
-    img.onload  = () => { clearTimeout(tid); resolve({ src: url, generator: 'Pollinations FLUX' }) }
-    img.onerror = () => { clearTimeout(tid); reject(new Error('Pollinations unavailable')) }
-    img.src = url
+    const urls = [
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}`,
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`,
+    ]
+    let urlIdx = 0
+    const tid = setTimeout(() => { img.src = ''; reject(new Error('timeout')) }, 40000)
+
+    const tryNext = () => {
+      if(urlIdx >= urls.length) {
+        clearTimeout(tid)
+        reject(new Error('Pollinations unavailable'))
+        return
+      }
+      img.src = urls[urlIdx++]
+    }
+
+    img.onload  = () => { clearTimeout(tid); resolve({ src: img.currentSrc, generator: 'Pollinations FLUX' }) }
+    img.onerror = tryNext
+    tryNext()
   })
 }
 
@@ -481,10 +495,10 @@ async function stableHorde(prompt, seed, slotId) {
   w = Math.max(w, 512); h = Math.max(h, 512)
 
   const body = {
-    prompt: `${prompt} ### ${SD_NEG}`,   // ### separates positive / negative in horde
+    prompt: `${prompt} ### ${SD_NEG}`,
     params: {
       sampler_name: 'k_euler',
-      cfg_scale: 7,
+      cfg_scale: 7.5,
       width: w, height: h,
       steps: 20,
       seed,
@@ -497,39 +511,87 @@ async function stableHorde(prompt, seed, slotId) {
     nsfw: false,
   }
 
-  const res = await fetch('https://stablehorde.net/api/v2/generate/async', {
-    method: 'POST',
-    headers: { 'apikey': '0000000000', 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+  let jobId
+  try {
+    const res = await fetch('https://stablehorde.net/api/v2/generate/async', {
+      method: 'POST',
+      headers: { 'apikey': '0000000000', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
 
-  if(!res.ok) throw new Error(`Horde error ${res.status}`)
-  const { id } = await res.json()
-  if(!id) throw new Error('No job ID')
+    if(!res.ok) {
+      const txt = await res.text()
+      throw new Error(`Submit error ${res.status}: ${txt.substring(0, 100)}`)
+    }
 
-  // Poll every 2s
-  for(let i = 0; i < 150; i++) {
-    await sleep(2000)
-    try {
-      const chk = await fetch(`https://stablehorde.net/api/v2/generate/check/${id}`)
-      if(!chk.ok) continue
-      const st = await chk.json()
-      const msg = st.done ? 'Finalising…'
-        : st.wait_time > 0 ? `GPU queue: ~${st.wait_time}s…`
-        : 'GPU rendering…'
-      setCardMsg(slotId, msg)
-      if(st.done) break
-      if(st.faulted) throw new Error('Worker faulted')
-    } catch(_) { /* keep polling */ }
+    const data = await res.json()
+    jobId = data?.id || data?.request_id
+    if(!jobId) throw new Error('No job ID in response')
+  } catch(e) {
+    throw new Error(`Failed to queue: ${e.message}`)
   }
 
-  const final = await fetch(`https://stablehorde.net/api/v2/generate/status/${id}`)
-  const data  = await final.json()
-  if(!data.generations?.length) throw new Error('No image returned')
+  setCardMsg(slotId, 'In GPU queue…')
 
-  setCardMsg(slotId, 'Downloading…')
-  const blob = await (await fetch(data.generations[0].img)).blob()
-  return { src: URL.createObjectURL(blob), generator: 'Stable Diffusion' }
+  // Poll every 2.5s with timeout
+  const startTime = Date.now()
+  const maxWait = 5 * 60 * 1000  // 5 min timeout
+
+  for(let i = 0; i < 200; i++) {
+    if(Date.now() - startTime > maxWait) throw new Error('Queue timeout after 5 minutes')
+
+    await sleep(2500)
+
+    try {
+      const chk = await fetch(`https://stablehorde.net/api/v2/generate/check/${jobId}`)
+      if(!chk.ok) {
+        console.warn(`Check failed ${chk.status}`)
+        continue
+      }
+
+      const st = await chk.json()
+      if(!st) continue
+
+      // Update message
+      if(st.wait_time > 0) {
+        setCardMsg(slotId, `Queue position: ${st.queue_position || '?'} (~${st.wait_time}s)`)
+      } else if(!st.done) {
+        setCardMsg(slotId, 'GPU rendering…')
+      } else {
+        setCardMsg(slotId, 'Finalising…')
+      }
+
+      if(st.done) break
+      if(st.faulted) throw new Error(`Worker faulted: ${st.fault}`)
+    } catch(e) {
+      // Keep polling even on transient errors
+      console.warn('Poll error:', e.message)
+    }
+  }
+
+  setCardMsg(slotId, 'Fetching result…')
+
+  try {
+    const final = await fetch(`https://stablehorde.net/api/v2/generate/status/${jobId}`)
+    if(!final.ok) throw new Error(`Status error ${final.status}`)
+
+    const data = await final.json()
+    if(!data.generations || data.generations.length === 0) {
+      throw new Error('No generations in response')
+    }
+
+    const imgUrl = data.generations[0].img
+    if(!imgUrl) throw new Error('No image URL')
+
+    setCardMsg(slotId, 'Downloading…')
+    const imgRes = await fetch(imgUrl)
+    if(!imgRes.ok) throw new Error(`Image fetch ${imgRes.status}`)
+
+    const blob = await imgRes.blob()
+    return { src: URL.createObjectURL(blob), generator: 'Stable Diffusion' }
+  } catch(e) {
+    throw new Error(`Result error: ${e.message}`)
+  }
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms))
