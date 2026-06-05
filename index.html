@@ -229,7 +229,7 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--border);
   <!-- Header -->
   <div class="eyebrow"><span>personal workspace</span> · AI image generation</div>
   <h1>IRREALLAB<br><em>STUDIO</em></h1>
-  <p class="tagline">Dual-engine · FLUX + Stable Diffusion · 100% free</p>
+  <p class="tagline">Dual-engine · Stable Diffusion + Hugging Face SDXL · 100% free · No auth</p>
 
   <!-- Prompt -->
   <label class="field-label" for="idea">Describe your image</label>
@@ -436,17 +436,21 @@ async function generate() {
 
 async function generateSlot(slotId, idea, seed) {
   setCardState(slotId, 'ld')
-  setCardMsg(slotId, 'Queuing on Stable Diffusion network…')
+  setCardMsg(slotId, 'Racing generators…')
 
   const sdPrompt = buildSDPrompt(idea)
 
+  // Race Stable Horde vs Hugging Face — whoever finishes first wins
+  const hordeRace = stableHorde(sdPrompt, seed, slotId)
+  const hfRace = huggingFaceInference(sdPrompt, seed, slotId)
+
   try {
-    const { src, generator } = await stableHorde(sdPrompt, seed, slotId)
+    const { src, generator } = await Promise.any([hordeRace, hfRace])
     setCardState(slotId, 'img', src, generator, '', sdPrompt)
     addHistory(src, idea)
   } catch(e) {
     setCardState(slotId, 'er', null, null, null, null,
-      `Generation failed: ${e.message}`)
+      `Both generators failed: ${e.message}`)
     throw e
   }
 }
@@ -564,6 +568,49 @@ async function stableHorde(prompt, seed, slotId) {
     return { src: URL.createObjectURL(blob), generator: 'Stable Diffusion' }
   } catch(e) {
     throw new Error(`Result error: ${e.message}`)
+  }
+}
+
+// ── Hugging Face Inference API — free, no auth ──
+async function huggingFaceInference(prompt, seed, slotId) {
+  setCardMsg(slotId, 'Queuing on Hugging Face…')
+
+  // Use Stable Diffusion XL (state-of-art free model)
+  const model = 'stabilityai/stable-diffusion-xl-base-1.0'
+  const url = `https://api-inference.huggingface.co/models/${model}`
+
+  try {
+    const payload = {
+      inputs: prompt,
+      parameters: {
+        negative_prompt: SD_NEG,
+        num_inference_steps: 30,
+        guidance_scale: 8,
+        seed,
+      },
+    }
+
+    setCardMsg(slotId, 'HF generating…')
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    if (!res.ok) {
+      const txt = await res.text()
+      throw new Error(`HF error ${res.status}: ${txt.substring(0, 100)}`)
+    }
+
+    const blob = await res.blob()
+    if (!blob.type.startsWith('image/')) {
+      throw new Error(`HF returned non-image: ${blob.type}`)
+    }
+
+    setCardMsg(slotId, 'HF done!')
+    return { src: URL.createObjectURL(blob), generator: 'Hugging Face SDXL' }
+  } catch (e) {
+    throw new Error(`Hugging Face failed: ${e.message}`)
   }
 }
 
