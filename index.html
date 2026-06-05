@@ -504,11 +504,11 @@ async function stableHorde(prompt, seed, slotId) {
       width: w,
       height: h,
       steps: 20,
-      seed,
+      seed: String(seed),  // MUST be string, not number!
       n: 1,
       karras: true,
     },
-    models: [],  // Empty = use any available model
+    models: [],
     r2: true,
     nsfw: false,
   }
