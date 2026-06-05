@@ -621,10 +621,7 @@ function bgClose(e){
 function saveKey(){
   const k = document.getElementById('gkey').value.trim()
   if(!k){ toast('Paste your Gemini API key first','er'); return }
-  if(!k.startsWith('AIza')){
-    toast('⚠️ Gemini keys start with "AIza" — check you copied the right one','er')
-    return
-  }
+
   localStorage.setItem('GEMINI_KEY', k)
   document.getElementById('gkey').value = ''
   toast('Gemini key saved! ✓','ok')
