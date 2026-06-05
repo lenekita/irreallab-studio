@@ -458,7 +458,6 @@ async function generate() {
   const btn = document.getElementById('genBtn')
   btn.disabled = true; btn.classList.add('busy')
 
-  // Reset UI
   setState('ld')
   hide('dlBtn'); hide('regenBtn'); hide('prWrap')
   setProgress(0, 'Building your prompt…')
@@ -467,11 +466,12 @@ async function generate() {
   lastPrompt = prompt
 
   try {
-    const src = await tryAll(prompt)
+    const src = await raceAll(prompt)
     const img = document.getElementById('outImg')
     img.src = src
     img.style.display = 'block'
     setState('img')
+    setProgress(100, 'Done!')
 
     document.getElementById('dlBtn').href = src
     document.getElementById('dlBtn').download = `irreallab-${Date.now()}.png`
@@ -488,59 +488,55 @@ async function generate() {
   btn.disabled = false; btn.classList.remove('busy')
 }
 
-// Try multiple generators
-async function tryAll(prompt) {
-  const seed = Math.floor(Math.random() * 999999)
-  const enc  = encodeURIComponent(prompt)
+// ── Race all generators — first to succeed wins ────────────────────────────
+async function raceAll(prompt) {
+  setProgress(10, 'Launching generators in parallel…')
 
-  // — Pollinations attempts —
-  const pUrls = [
-    `https://image.pollinations.ai/prompt/${enc}?width=${imgW}&height=${imgH}&seed=${seed}`,
-    `https://image.pollinations.ai/prompt/${enc}?seed=${seed}`,
-    `https://image.pollinations.ai/prompt/${enc}`,
-  ]
+  // Pollinations: load via <img> tag — no CORS, no fetch, bypasses 402 restrictions
+  const pollP = pollinationsDirect(prompt)
 
-  for(let i = 0; i < pUrls.length; i++) {
-    setProgress(10 + i * 12, `Generating via Pollinations${i > 0 ? ` (try ${i+1})` : ''}…`)
-    try {
-      const r = await fetchWithTimeout(pUrls[i], 30000)
-      if(r.ok) {
-        const blob = await r.blob()
-        if(blob.size > 5000 && blob.type.startsWith('image/')) {
-          setProgress(95, 'Finalising…')
-          return URL.createObjectURL(blob)
-        }
-      }
-    } catch(_) { /* next */ }
+  // Stable Horde: submit immediately in parallel
+  const hordeP = stableHorde(prompt)
+
+  // Whichever finishes first wins
+  try {
+    return await Promise.any([pollP, hordeP])
+  } catch {
+    throw new Error('All generators failed. Please try again in a moment.')
   }
-
-  // — Stable Horde fallback —
-  setProgress(40, 'Switching to Stable Horde (community GPU)…')
-  return await stableHorde(prompt)
 }
 
-function fetchWithTimeout(url, ms) {
-  const ctrl = new AbortController()
-  const id = setTimeout(() => ctrl.abort(), ms)
-  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(id))
+// Pollinations via direct <img> src — no CORS/fetch overhead
+function pollinationsDirect(prompt) {
+  return new Promise((resolve, reject) => {
+    const seed = Math.floor(Math.random() * 999999)
+    const url  = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${imgW}&height=${imgH}&seed=${seed}`
+    const img  = new Image()
+    const tid  = setTimeout(() => reject(new Error('Pollinations timeout')), 40000)
+    img.onload  = () => { clearTimeout(tid); setProgress(95, 'Pollinations done!'); resolve(url) }
+    img.onerror = () => { clearTimeout(tid); reject(new Error('Pollinations 402')) }
+    img.src = url
+  })
 }
 
-// Stable Horde — free, anonymous, SDXL-quality
+// Stable Horde — free anonymous SDXL, optimised for speed
 async function stableHorde(prompt) {
-  setProgress(45, 'Submitting to Stable Horde queue…')
+  setProgress(15, 'Queuing on Stable Horde GPU network…')
+
+  const dim = Math.min(imgW, imgH, 768)  // cap at 768 for speed
 
   const body = {
     prompt,
     params: {
-      sampler_name: 'k_euler_a',
-      cfg_scale: 7.5,
-      width:  imgW <= 768 ? imgW : 1024,
-      height: imgH <= 768 ? imgH : 1024,
-      steps: 28,
+      sampler_name: 'k_euler',   // faster than euler_a
+      cfg_scale: 7,
+      width:  imgW >= imgH ? dim : Math.round(dim * imgW / imgH / 64) * 64,
+      height: imgH >= imgW ? dim : Math.round(dim * imgH / imgW / 64) * 64,
+      steps: 20,                 // 20 steps = fast + good quality
       n: 1,
-      karras: true,
+      karras: false,
     },
-    models: ['AlbedoBase XL (SDXL)'],
+    models: ['Deliberate'],      // fast, high-quality, many workers
     r2: true,
     shared: false,
     nsfw: false,
@@ -552,40 +548,35 @@ async function stableHorde(prompt) {
     body: JSON.stringify(body),
   })
 
-  if(!res.ok) {
-    const t = await res.text()
-    throw new Error(`Stable Horde error ${res.status} — please try again.`)
-  }
-
+  if(!res.ok) throw new Error(`Horde queue error ${res.status}`)
   const { id } = await res.json()
-  if(!id) throw new Error('No job ID returned — please try again.')
+  if(!id) throw new Error('No job ID — try again.')
 
-  setProgress(50, 'Job queued — waiting for a GPU worker…')
-
-  // Poll until done (up to 5 min)
-  for(let i = 0; i < 100; i++) {
-    await sleep(3000)
-    const chk = await fetch(`https://stablehorde.net/api/v2/generate/check/${id}`)
-    if(!chk.ok) continue
-    const st = await chk.json()
-
-    const pct = Math.min(90, 52 + i * 0.4)
-    const wt  = st.wait_time > 0 ? `~${st.wait_time}s left` : 'almost done…'
-    setProgress(Math.round(pct), st.done ? 'Processing final image…' : `GPU working — ${wt}`)
-
-    if(st.done) break
-    if(st.faulted) throw new Error('Generation faulted on worker — try again.')
+  // Poll every 2s (faster polling)
+  for(let i = 0; i < 150; i++) {
+    await sleep(2000)
+    try {
+      const chk = await fetch(`https://stablehorde.net/api/v2/generate/check/${id}`)
+      if(!chk.ok) continue
+      const st = await chk.json()
+      const pct = Math.min(88, 20 + i * 0.5)
+      const msg = st.done
+        ? 'Finalising your image…'
+        : st.wait_time > 0
+          ? `Queue: ~${st.wait_time}s remaining…`
+          : 'GPU rendering…'
+      setProgress(Math.round(pct), msg)
+      if(st.done) break
+      if(st.faulted) throw new Error('Worker faulted — retrying…')
+    } catch(_) { /* keep polling */ }
   }
 
-  setProgress(93, 'Downloading your image…')
   const final = await fetch(`https://stablehorde.net/api/v2/generate/status/${id}`)
   const data  = await final.json()
+  if(!data.generations?.length) throw new Error('No image returned — try again.')
 
-  if(!data.generations?.length) throw new Error('No image returned. The queue may be busy — try again in a moment.')
-
-  const imgUrl = data.generations[0].img
-  const imgRes = await fetch(imgUrl)
-  const blob   = await imgRes.blob()
+  setProgress(93, 'Downloading…')
+  const blob = await (await fetch(data.generations[0].img)).blob()
   return URL.createObjectURL(blob)
 }
 
