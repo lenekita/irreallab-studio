@@ -197,6 +197,63 @@ textarea:focus{border-color:rgba(212,240,58,.35);}
 .hi:hover .hi-ov{opacity:1;}
 .hi-ov span{font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);}
 
+/* ── SETTINGS ── */
+.settings-btn{
+  background:transparent;border:1px solid var(--border);border-radius:2px;
+  padding:8px 12px;color:var(--muted);font-size:18px;cursor:pointer;
+  transition:.15s;align-self:flex-start;
+}
+.settings-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.settings-modal{
+  position:fixed;inset:0;background:rgba(6,6,6,.8);display:none;
+  z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+}
+.settings-modal.open{display:flex;}
+.settings-panel{
+  background:var(--s1);border:1px solid var(--border);border-radius:3px;
+  padding:32px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;
+  animation:slideIn .3s ease-out;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-20px);}to{opacity:1;}}
+
+.settings-panel h2{
+  font-family:'Bebas Neue',sans-serif;font-size:1.8rem;
+  color:var(--text);margin-bottom:24px;letter-spacing:-.01em;
+}
+.api-group{margin-bottom:28px;}
+.api-group label{
+  display:block;font-size:.55rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+}
+.api-group input{
+  width:100%;padding:12px;background:var(--s2);border:1px solid var(--border);
+  border-radius:2px;color:var(--text);font-family:'Space Mono',monospace;
+  font-size:13px;outline:none;transition:border-color .2s;
+}
+.api-group input:focus{border-color:rgba(212,240,58,.35);}
+.api-hint{
+  font-size:.5rem;color:var(--muted);margin-top:6px;line-height:1.5;
+}
+.api-status{
+  font-size:.52rem;margin-top:6px;display:flex;align-items:center;gap:6px;
+}
+.api-status.ok{color:var(--accent);}
+.api-status.er{color:var(--red);}
+.status-dot{width:6px;height:6px;border-radius:50%;}
+.api-status.ok .status-dot{background:var(--accent);}
+.api-status.er .status-dot{background:var(--red);}
+
+.settings-actions{
+  display:flex;gap:12px;margin-top:28px;padding-top:24px;border-top:1px solid var(--border);}
+.close-settings{
+  flex:1;padding:10px;background:transparent;border:1px solid var(--border);
+  border-radius:2px;color:var(--muted);font-family:'Space Mono',monospace;
+  font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;
+  cursor:pointer;transition:.15s;
+}
+.close-settings:hover{border-color:var(--accent);color:var(--accent);}
+
 /* ── FOOTER ── */
 footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;}
@@ -227,9 +284,14 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--border);
 <div class="wrap">
 
   <!-- Header -->
-  <div class="eyebrow"><span>personal workspace</span> · AI image generation</div>
-  <h1>IRREALLAB<br><em>STUDIO</em></h1>
-  <p class="tagline">Dual-engine · Stable Diffusion + Hugging Face SDXL · 100% free · No auth</p>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div>
+      <div class="eyebrow"><span>personal workspace</span> · AI image generation</div>
+      <h1>IRREALLAB<br><em>STUDIO</em></h1>
+      <p class="tagline" id="tagline">Dual-engine · Stable Diffusion + Hugging Face SDXL · 100% free · No auth</p>
+    </div>
+    <button class="settings-btn" onclick="openSettings()" title="API Keys & Settings">⚙️</button>
+  </div>
 
   <!-- Prompt -->
   <label class="field-label" for="idea">Describe your image</label>
@@ -325,6 +387,30 @@ footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--border);
   </footer>
 </div>
 
+<!-- Settings Modal -->
+<div class="settings-modal" id="settingsModal" onclick="closeSettingsOnBackdrop(event)">
+  <div class="settings-panel" onclick="event.stopPropagation()">
+    <h2>API Keys & Settings</h2>
+
+    <div class="api-group">
+      <label for="geminiKey">Google Gemini API Key</label>
+      <input type="password" id="geminiKey" placeholder="AIzaSy..." onchange="saveAPIKey('gemini', this.value)">
+      <div class="api-hint">Get your key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);text-decoration:underline;">aistudio.google.com/apikey</a></div>
+      <div class="api-status" id="geminiStatus"></div>
+    </div>
+
+    <div class="api-group">
+      <label for="vertexKey">Vertex AI API Key (Optional)</label>
+      <input type="password" id="vertexKey" placeholder="Requires backend setup">
+      <div class="api-hint">Vertex AI requires server-side authentication. For now, Gemini is recommended.</div>
+    </div>
+
+    <div class="settings-actions">
+      <button class="close-settings" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -334,6 +420,68 @@ let imgW = 1024, imgH = 1024
 let varCount = 2
 let history = []
 let lastIdea = ''
+let geminiKey = ''
+let vertexKey = ''
+
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+  geminiKey = localStorage.getItem('geminiKey') || ''
+  vertexKey = localStorage.getItem('vertexKey') || ''
+  updateTagline()
+  if(geminiKey) updateAPIStatus('gemini', true)
+})
+
+// ─── Settings Modal ───────────────────────────────────────────────────────────
+function openSettings() {
+  const modal = document.getElementById('settingsModal')
+  modal.classList.add('open')
+  document.getElementById('geminiKey').value = geminiKey
+  document.getElementById('vertexKey').value = vertexKey
+}
+
+function closeSettings() {
+  const modal = document.getElementById('settingsModal')
+  modal.classList.remove('open')
+}
+
+function closeSettingsOnBackdrop(e) {
+  if(e.target.id === 'settingsModal') closeSettings()
+}
+
+function saveAPIKey(service, value) {
+  if(service === 'gemini') {
+    geminiKey = value.trim()
+    localStorage.setItem('geminiKey', geminiKey)
+    updateAPIStatus('gemini', geminiKey.length > 0)
+    updateTagline()
+    showToast(geminiKey ? '✓ Gemini key saved' : '✗ Key cleared', geminiKey ? 'ok' : 'er')
+  } else if(service === 'vertex') {
+    vertexKey = value.trim()
+    localStorage.setItem('vertexKey', vertexKey)
+    updateAPIStatus('vertex', vertexKey.length > 0)
+  }
+}
+
+function updateAPIStatus(service, isSet) {
+  const el = document.getElementById(service + 'Status')
+  if(!el) return
+  if(isSet) {
+    el.className = 'api-status ok'
+    el.innerHTML = '<span class="status-dot"></span><span>API key configured</span>'
+  } else {
+    el.className = 'api-status er'
+    el.innerHTML = '<span class="status-dot"></span><span>No API key</span>'
+  }
+}
+
+function updateTagline() {
+  const engines = []
+  if(geminiKey) engines.push('Gemini')
+  engines.push('Stable Diffusion')
+  engines.push('Hugging Face SDXL')
+  const tagline = `${engines.length}-engine · ${engines.join(' + ')} · ${geminiKey ? 'Premium+Free' : '100% free'} · ${geminiKey ? 'Auth' : 'No auth'}`
+  document.getElementById('tagline').textContent = tagline
+}
 
 // ─── Prompt maps — FLUX vs Stable Diffusion use completely different syntax ──
 
@@ -440,17 +588,25 @@ async function generateSlot(slotId, idea, seed) {
 
   const sdPrompt = buildSDPrompt(idea)
 
-  // Race Stable Horde vs Hugging Face — whoever finishes first wins
-  const hordeRace = stableHorde(sdPrompt, seed, slotId)
-  const hfRace = huggingFaceInference(sdPrompt, seed, slotId)
+  // Build race with available generators
+  const races = [
+    stableHorde(sdPrompt, seed, slotId),
+    huggingFaceInference(sdPrompt, seed, slotId),
+  ]
+
+  // Add Gemini if API key is configured
+  if(geminiKey) {
+    races.push(geminiGenerate(idea, seed, slotId))
+  }
 
   try {
-    const { src, generator } = await Promise.any([hordeRace, hfRace])
+    const { src, generator } = await Promise.any(races)
     setCardState(slotId, 'img', src, generator, '', sdPrompt)
     addHistory(src, idea)
   } catch(e) {
+    const available = geminiKey ? 'Stable Horde, Hugging Face, Gemini' : 'Stable Horde, Hugging Face'
     setCardState(slotId, 'er', null, null, null, null,
-      `Both generators failed: ${e.message}`)
+      `All generators failed: ${e.message}. Available: ${available}`)
     throw e
   }
 }
@@ -611,6 +767,82 @@ async function huggingFaceInference(prompt, seed, slotId) {
     return { src: URL.createObjectURL(blob), generator: 'Hugging Face SDXL' }
   } catch (e) {
     throw new Error(`Hugging Face failed: ${e.message}`)
+  }
+}
+
+// ── Google Gemini Image Generation ──
+async function geminiGenerate(idea, seed, slotId) {
+  setCardMsg(slotId, 'Queuing on Gemini…')
+
+  if(!geminiKey) throw new Error('Gemini API key not configured')
+
+  const maxDim = 768
+  const ratio  = imgW / imgH
+  let w, h
+  if(ratio >= 1) { w = maxDim; h = Math.round(maxDim / ratio / 64) * 64 }
+  else           { h = maxDim; w = Math.round(maxDim * ratio / 64) * 64 }
+  w = Math.max(w, 512); h = Math.max(h, 512)
+
+  const style = FLUX_STYLES[activeStyle] || FLUX_STYLES.cinematic
+  const light = getLighting(idea)
+  const prompt = `${idea}. ${style}. ${light}. Masterpiece quality, highly detailed, award-winning.`
+
+  try {
+    setCardMsg(slotId, 'Gemini processing…')
+
+    // Call Google's Imagen API via generativelanguage REST endpoint
+    // Note: This requires proper Vertex AI setup for image generation
+    // For now, we use a workaround via a compatible endpoint
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict`
+
+    const payload = {
+      instances: [{
+        prompt: prompt,
+        imageCount: 1,
+        width: w,
+        height: h,
+        seed: seed,
+      }],
+      parameters: {
+        sampleCount: 1,
+        guidanceScale: 7.5,
+      }
+    }
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': geminiKey,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if(!res.ok) {
+      const txt = await res.text()
+      // If Imagen endpoint fails, provide helpful message
+      if(res.status === 403 || res.status === 401) {
+        throw new Error('API key invalid or Imagen not enabled in Vertex AI')
+      }
+      throw new Error(`Gemini error ${res.status}: ${txt.substring(0, 150)}`)
+    }
+
+    setCardMsg(slotId, 'Gemini finalizing…')
+    const data = await res.json()
+
+    if(!data.predictions || !data.predictions[0]) {
+      throw new Error('No image generated from Gemini')
+    }
+
+    const imgBase64 = data.predictions[0].bytesBase64Encoded
+    if(!imgBase64) throw new Error('No image data in response')
+
+    const blob = new Blob([Uint8Array.from(atob(imgBase64), c => c.charCodeAt(0))], { type: 'image/png' })
+    setCardMsg(slotId, 'Gemini done!')
+    return { src: URL.createObjectURL(blob), generator: 'Google Gemini' }
+  } catch(e) {
+    throw new Error(`Gemini failed: ${e.message}`)
   }
 }
 
